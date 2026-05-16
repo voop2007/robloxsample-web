@@ -298,4 +298,17 @@
             if (!nombre || !codigo) { alert("Completa los campos requeridos."); return; }
 
             try {
-                const { error } = await supabaseClient.from('juegos').insert(
+                const { error } = await supabaseClient.from('juegos').insert([
+                    { nombre, imagen_url: imagen || "https://images.rbxcdn.com/9fbda9da694da83928424fb84236a281.png", codigo, jugadores: "2.5K" }
+                ]);
+                if (error) throw error;
+                alert("¡Juego guardado!");
+                document.getElementById('newGameName').value = '';
+                document.getElementById('newGameImage').value = '';
+                document.getElementById('newGameCodes').value = '';
+                showSection('juegos');
+            } catch (err) { alert("Error: " + err.message); }
+        });
+    </script>
+</body>
+</html>
