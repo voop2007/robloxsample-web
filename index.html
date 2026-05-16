@@ -7,10 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header class="sticky top-0 z-40 neo-glass">
-        <div class="container-wide flex items-center justify-between h-16 px-4">
+        <div class="container-wide flex items-center justify-between h-16 px-4 mx-auto max-w-7xl">
             
             <div id="logoAdminTrigger" class="flex items-center space-x-4 cursor-pointer select-none shrink-0">
                 <div class="w-10 h-10 bg-gradient-to-br from-cyan-electric to-magenta-cyber rounded-lg flex items-center justify-center">
@@ -19,20 +20,21 @@
                 <h1 class="text-2xl font-bold titanium-title">RobloxSample</h1>
             </div>
 
-            <nav class="flex items-center space-x-3 overflow-x-auto max-w-[60%] md:max-w-full md:space-x-6 py-1 scrollbar-none">
-                <button onclick="showSection('inicio')" class="nav-cyber whitespace-nowrap">Inicio</button>
-                <button onclick="showSection('juegos')" class="nav-cyber whitespace-nowrap">Códigos</button>
-                <button onclick="showSection('ropa')" class="nav-cyber whitespace-nowrap">Ropa</button>
-                <button onclick="showSection('robux')" class="nav-cyber whitespace-nowrap">Robux</button>
+            <nav class="menu-scroll-custom space-x-4 md:space-x-6">
+                <button onclick="showSection('inicio')" class="nav-cyber">Inicio</button>
+                <button onclick="showSection('juegos')" class="nav-cyber">Códigos</button>
+                <button onclick="showSection('ropa')" class="nav-cyber">Ropa</button>
+                <button onclick="showSection('robux')" class="nav-cyber">Robux</button>
             </nav>
 
             </div>
     </header>
 
-    <main>
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
         <section id="inicio" class="section-padding tab-content">
             <div class="container-wide">
-                <div class="neo-glass p-8 max-w-4xl mx-auto text-center">
+                <div class="neo-glass p-8 max-w-4xl mx-auto text-center rounded-2xl">
                     <h2 class="text-5xl font-bold mb-6 titanium-title">🎁 Sorteo Exclusivo</h2>
                     <p class="text-xl text-gray-300 mb-8">Participa por Robux y items limitados.</p>
                     <div id="sorteoContainer" class="max-w-md mx-auto">
@@ -66,7 +68,8 @@
             <div class="container-wide text-center">
                 <h2 class="text-4xl font-bold mb-6 titanium-title">👕 Ropa Limitada</h2>
                 <div id="clothingContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    </div>
+                    <p class="text-center text-zinc-500 col-span-full py-8">Sección en mantenimiento técnico...</p>
+                </div>
             </div>
         </section>
 
@@ -74,141 +77,34 @@
             <div class="container-wide text-center">
                 <h2 class="text-4xl font-bold mb-6 titanium-title">🪙 Conseguir Robux</h2>
                 <div id="robuxContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    </div>
+                    <p class="text-center text-zinc-500 col-span-full py-8">Sección en mantenimiento técnico...</p>
+                </div>
             </div>
         </section>
 
-        <section id="adminFormSection" class="tab-content hidden section-padding">
+        <section id="adminFormSection" class="section-padding tab-content hidden">
             <div class="max-w-md mx-auto bg-zinc-900 p-6 rounded-xl border border-zinc-800 neo-glass">
                 <h3 class="text-xl font-bold mb-4 titanium-title"><i class="fas fa-user-shield"></i> Panel Administrador</h3>
                 <div class="space-y-4 text-left">
                     <div>
                         <label class="block text-xs text-zinc-400 mb-1">Nombre del Juego</label>
-                        <input id="newGameName" type="text" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white">
+                        <input id="newGameName" type="text" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-xs text-zinc-400 mb-1">URL de la Imagen</label>
-                        <input id="newGameImage" type="text" placeholder="https://..." class="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white">
+                        <input id="newGameImage" type="text" placeholder="https://..." class="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-xs text-zinc-400 mb-1">Código Promocional</label>
-                        <input id="newGameCodes" type="text" placeholder="Ej: KRAKEN2026" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white">
+                        <input id="newGameCodes" type="text" placeholder="Ej: KRAKEN2026" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none">
                     </div>
-                    <button id="quickAddGameBtn" class="w-full btn-cyber py-2 rounded font-bold text-sm">Guardar en Base de Datos</button>
+                    <button id="quickAddGameBtn" class="w-full btn-cyber py-2 rounded font-bold text-sm">Guardar en Supabase</button>
                 </div>
             </div>
         </section>
+
     </main>
 
-    <script>
-        // ⚠️ REEMPLAZA ESTOS DATOS CON LOS DE TU PROYECTO REAL DE SUPABASE
-        const SUPABASE_URL = "https://tu-url-de-supabase.supabase.co"; 
-        const SUPABASE_KEY = "tu-clave-anon-publica-aqui";
-
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        let todosLosJuegos = [];
-
-        // Sistema de pestañas
-        function showSection(sectionId) {
-            document.querySelectorAll('.tab-content').forEach(section => {
-                section.classList.add('hidden');
-            });
-            document.getElementById(sectionId).classList.remove('hidden');
-
-            if(sectionId === 'juegos') { fetchJuegos(); }
-        }
-
-        // 🔐 ACCESOS OCULTOS AL PANEL ADMIN SOLICITADOS
-        
-        // PC: Tecla F8
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'F8') {
-                e.preventDefault();
-                showSection('adminFormSection');
-            }
-        });
-
-        // Celular: 8 Clics continuos en el logo (RobloxSample)
-        let clickContador = 0;
-        let temporizadorReset;
-        document.getElementById('logoAdminTrigger').addEventListener('click', () => {
-            clickContador++;
-            clearTimeout(temporizadorReset);
-            // Si el usuario deja de presionar por más de 1.5 segundos, el contador se reinicia
-            temporizadorReset = setTimeout(() => { clickContador = 0; }, 1500);
-
-            if (clickContador === 8) {
-                clickContador = 0;
-                showSection('adminFormSection');
-            }
-        });
-
-        // Cargar juegos desde Supabase
-        async function fetchJuegos() {
-            const container = document.getElementById('gamesContainer');
-            try {
-                const { data: juegos, error } = await supabaseClient.from('juegos').select('*');
-                if (error) throw error;
-                todosLosJuegos = juegos || [];
-                renderGamesList(todosLosJuegos);
-            } catch (err) {
-                container.innerHTML = `<p class="text-center text-red-400 col-span-full">Error al conectar base de datos.</p>`;
-            }
-        }
-
-        // Renderizado de tarjetas dinámicas con tu diseño original
-        function renderGamesList(lista) {
-            const container = document.getElementById('gamesContainer');
-            if (lista.length === 0) {
-                container.innerHTML = `<p class="text-center text-zinc-400 col-span-full py-8">No se encontraron juegos.</p>`;
-                return;
-            }
-            container.innerHTML = "";
-            lista.forEach(juego => {
-                const nombre = juego.nombre || "Juego de Roblox";
-                const imagen = juego.imagen_url || "https://images.rbxcdn.com/9fbda9da694da83928424fb84236a281.png";
-                const codigo = juego.codigo || "No activo";
-                const jugadores = juego.jugadores !== undefined ? juego.jugadores : "1.5K";
-
-                container.innerHTML += `
-                    <div class="neo-glass rounded-xl overflow-hidden p-4">
-                        <img src="${imagen}" alt="${nombre}" class="w-full h-40 object-cover rounded-lg mb-3">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="font-bold text-lg text-white truncate max-w-[70%]">${nombre}</h3>
-                            <span class="text-xs text-zinc-400"><i class="fas fa-users text-cyan-400"></i> ${jugadores}</span>
-                        </div>
-                        <div class="bg-zinc-950 p-2 rounded border border-zinc-800 flex items-center justify-between">
-                            <code class="text-pink-400 font-mono text-sm font-bold">${codigo}</code>
-                            <button onclick="navigator.clipboard.writeText('${codigo}'); alert('¡Código copiado!');" class="text-zinc-400 hover:text-white text-xs px-2 py-1 bg-zinc-800 rounded">Copiar</button>
-                        </div>
-                    </div>`;
-            });
-        }
-
-        // Función de búsqueda
-        function filterGames() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtrados = todosLosJuegos.filter(juego => juego.nombre.toLowerCase().includes(query));
-            renderGamesList(filtrados);
-        }
-
-        // Guardar juego desde Panel Admin Oculto
-        document.getElementById('quickAddGameBtn').addEventListener('click', async () => {
-            const nombre = document.getElementById('newGameName').value;
-            const imagen = document.getElementById('newGameImage').value;
-            const codigo = document.getElementById('newGameCodes').value;
-
-            if (!nombre || !codigo) return;
-            try {
-                const { error } = await supabaseClient.from('juegos').insert([{ nombre, imagen_url: imagen, codigo }]);
-                if (error) throw error;
-                alert("¡Juego guardado correctamente!");
-                document.getElementById('newGameName').value = '';
-                document.getElementById('newGameImage').value = '';
-                document.getElementById('newGameCodes').value = '';
-                showSection('juegos');
-            } catch (err) { alert("Error al guardar: " + err.message); }
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
