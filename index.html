@@ -1,397 +1,246 @@
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RobloxSample - Códigos y Guías</title>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <link rel="stylesheet" href="style.css?v=2">
-</head>
-
-<body>
-
-    <header class="sticky top-0 z-40 neo-glass">
-
-        <div id="announcementBanner"
-            class="hidden bg-gradient-to-r from-pink-500 to-cyan-400 text-black px-4 py-2 text-center font-bold text-sm">
-            <span id="bannerText"></span>
-        </div>
-
-        <div class="container-wide">
-            <div class="flex items-center justify-between h-16">
-
-                <div class="flex items-center space-x-4">
-                    <div
-                        class="w-10 h-10 bg-gradient-to-br from-cyan-400 to-pink-500 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-gamepad text-white text-lg"></i>
-                    </div>
-                    <h1 class="text-2xl font-bold titanium-title">RobloxSample</h1>
-                </div>
-
-                <nav class="flex items-center space-x-4 md:space-x-6 overflow-x-auto md:overflow-visible max-w-[60%] md:max-w-none mobile-nav-scroll py-1 whitespace-nowrap">
-                    <button onclick="showSection('inicio')" class="nav-cyber">Inicio</button>
-                    <button onclick="showSection('juegos')" class="nav-cyber">Códigos</button>
-                    <button onclick="showSection('ropa')" class="nav-cyber">Ropa</button>
-                    <button onclick="showSection('robux')" class="nav-cyber">Robux</button>
-
-                    <div class="relative">
-                        <input type="text" id="searchInput" placeholder="🔍 Buscar juegos..."
-                            class="w-56 px-4 py-2 rounded-full text-sm text-white bg-black/60 border border-cyan-400/30 focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-400/30 transition-all duration-300 placeholder-gray-400">
-                        <i
-                            class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-cyan-400 text-sm pointer-events-none"></i>
-                    </div>
-                </nav>
-
-                <button id="adminBtn" class="px-4 py-2 btn-cyber rounded-lg">
-                    <i class="fas fa-cog"></i> Admin
-                </button>
-
-            </div>
-        </div>
-
-    </header>
-
-
-    <main>
-
-        <section id="inicio" class="section-padding">
-            <div class="container-wide">
-                <div class="max-w-4xl mx-auto">
-                    <div class="neo-glass p-8">
-                        <div class="text-center">
-
-                            <h2 class="text-5xl font-bold mb-6 titanium-title">
-                                🎁 Sorteo Exclusivo Roblox
-                            </h2>
-
-                            <p class="text-xl text-gray-300 mb-8">
-                                Participa para ganar Robux gratis y items exclusivos
-                            </p>
-
-                            <div id="sorteoContainer" class="max-w-md mx-auto">
-
-                                <div id="countdown" class="countdown-cyber mb-6 hidden">45</div>
-
-                                <div class="progress-cyber hidden" id="progressBar">
-                                    <div class="progress-cyber-fill" id="progressFill"></div>
-                                </div>
-
-                                <button id="participarBtn"
-                                    class="btn-cyber px-10 py-4 rounded-xl text-lg font-bold text-white">
-                                    <i class="fas fa-gift mr-2"></i> Participar Ahora
-                                </button>
-
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-
-        <section id="juegos" class="section-padding hidden">
-            <div class="container-wide">
-
-                <h2 class="text-4xl font-bold mb-12 text-center cyber-accent">
-                    🎮 Códigos de Juegos Roblox
-                </h2>
-
-                <div id="gamesContainer"
-                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                </div>
-
-            </div>
-        </section>
-
-
-        <section id="ropa" class="section-padding hidden">
-            <div class="container-wide">
-                <h2 class="text-4xl font-bold mb-12 text-center cyber-accent">
-                    👕 Ropa Gratis - Códigos de Avatar
-                </h2>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-                    <div class="neo-card p-8">
-                        <h3 class="text-xl font-bold mb-6 titanium-title">Mansion of Wonder</h3>
-                        <div class="space-y-3">
-                            <div class="code-block">
-                                <code class="text-green-400">FXARTIST</code>
-                                <p class="text-sm text-gray-400 mt-1">Artist Backpack</p>
-                            </div>
-                            <div class="code-block">
-                                <code class="text-green-400">SPIDERCOLA</code>
-                                <p class="text-sm text-gray-400 mt-1">Spider Cola Shoulder Pet</p>
-                            </div>
-                            <div class="code-block">
-                                <code class="text-green-400">TWEETROBLOX</code>
-                                <p class="text-sm text-gray-400 mt-1">The Bird Says Shoulder Pet</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="neo-card p-8">
-                        <h3 class="text-xl font-bold mb-6 titanium-title">Island of Move</h3>
-                        <div class="space-y-3">
-                            <div class="code-block">
-                                <code class="text-green-400">STRIKEAPOSE</code>
-                                <p class="text-sm text-gray-400 mt-1">Hustle Hat</p>
-                            </div>
-                            <div class="code-block">
-                                <code class="text-green-400">SETTINGTHESTAGE</code>
-                                <p class="text-sm text-gray-400 mt-1">Build It Backpack</p>
-                            </div>
-                            <div class="code-block">
-                                <code class="text-green-400">DIY</code>
-                                <p class="text-sm text-gray-400 mt-1">Kinetic Staff</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="neo-card p-8">
-                        <h3 class="text-xl font-bold mb-6 titanium-title">Gamefam Assets</h3>
-                        <div class="space-y-3">
-                            <div class="code-block">
-                                <code class="text-green-400">VICTORYLAP</code>
-                                <p class="text-sm text-gray-400 mt-1">Cardio Canes</p>
-                            </div>
-                            <div class="code-block">
-                                <code class="text-green-400">WORLDALIVE</code>
-                                <p class="text-sm text-gray-400 mt-1">Crystalline Companion</p>
-                            </div>
-                            <div class="code-block">
-                                <code class="text-green-400">MERCADOLIBREFEDORA2021</code>
-                                <p class="text-sm text-gray-400 mt-1">White Flamingo Fedora</p>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </section>
-
-
-        <section id="robux" class="section-padding hidden">
-            <div class="container-wide">
-
-                <h2 class="text-4xl font-bold mb-12 text-center cyber-accent">
-                    💰 Cómo Obtener Robux Legalmente
-                </h2>
-
-                <p class="text-center text-gray-300 mb-12 max-w-3xl mx-auto">
-                    Aquí tienes métodos reales y seguros para conseguir Robux sin estafas.
-                    Recuerda: nunca uses páginas falsas que pidan tu contraseña.
-                </p>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-                    <div class="neo-card p-8">
-                        <div class="flex items-center mb-4">
-                            <div
-                                class="w-12 h-12 bg-gradient-to-br from-cyan-electric to-magenta-cyber/20 rounded-lg flex items-center justify-center mr-4">
-                                <i class="fab fa-microsoft text-cyan-electric text-xl"></i>
-                            </div>
-                            <h3 class="text-xl font-bold titanium-title">Microsoft Rewards</h3>
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            Gana puntos buscando en Bing y completando tareas diarias. Luego canjea por tarjetas de
-                            Robux.
-                        </p>
-                        <p class="text-sm text-green-400 font-bold">✔ Seguro y legal</p>
-                    </div>
-
-                    <div class="neo-card p-8">
-                        <div class="flex items-center mb-4">
-                            <div
-                                class="w-12 h-12 bg-gradient-to-br from-cyan-electric to-magenta-cyber/20 rounded-lg flex items-center justify-center mr-4">
-                                <i class="fas fa-gamepad text-cyan-electric text-xl"></i>
-                            </div>
-                            <h3 class="text-xl font-bold titanium-title">Crear Juegos en Roblox</h3>
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            Si creas un juego y se vuelve popular, puedes ganar Robux con visitas, compras y gamepasses.
-                        </p>
-                        <p class="text-sm text-green-400 font-bold">✔ Mejor método a largo plazo</p>
-                    </div>
-
-                    <div class="neo-card p-8">
-                        <div class="flex items-center mb-4">
-                            <div
-                                class="w-12 h-12 bg-gradient-to-br from-cyan-electric to-magenta-cyber/20 rounded-lg flex items-center justify-center mr-4">
-                                <i class="fas fa-tshirt text-cyan-electric text-xl"></i>
-                            </div>
-                            <h3 class="text-xl font-bold titanium-title">Vender Ropa y Accesorios</h3>
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            Diseña camisas, pantalones o UGC y véndelos en el catálogo para ganar Robux.
-                        </p>
-                        <p class="text-sm text-green-400 font-bold">✔ Ideal si eres creativo</p>
-                    </div>
-
-                    <div class="neo-card p-8">
-                        <div class="flex items-center mb-4">
-                            <div
-                                class="w-12 h-12 bg-gradient-to-br from-cyan-electric to-magenta-cyber/20 rounded-lg flex items-center justify-center mr-4">
-                                <i class="fas fa-link text-cyan-electric text-xl"></i>
-                            </div>
-                            <h3 class="text-xl font-bold titanium-title">Programa de Afiliados</h3>
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            Comparte links de Roblox y gana Robux cuando alguien compre usando tu enlace.
-                        </p>
-                        <p class="text-sm text-green-400 font-bold">✔ Funciona con redes sociales</p>
-                    </div>
-
-                    <div class="neo-card p-8">
-                        <div class="flex items-center mb-4">
-                            <div
-                                class="w-12 h-12 bg-gradient-to-br from-cyan-electric to-magenta-cyber/20 rounded-lg flex items-center justify-center mr-4">
-                                <i class="fas fa-crown text-cyan-electric text-xl"></i>
-                            </div>
-                            <h3 class="text-xl font-bold titanium-title">Roblox Premium</h3>
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            Roblox Premium te da Robux mensuales y te permite vender items más fácil.
-                        </p>
-                        <p class="text-sm text-yellow-400 font-bold">⭐ Método oficial</p>
-                    </div>
-
-                    <div class="neo-card p-8">
-                        <div class="flex items-center mb-4">
-                            <div
-                                class="w-12 h-12 bg-gradient-to-br from-cyan-electric to-magenta-cyber/20 rounded-lg flex items-center justify-center mr-4">
-                                <i class="fas fa-gift text-cyan-electric text-xl"></i>
-                            </div>
-                            <h3 class="text-xl font-bold titanium-title">Eventos y Sorteos</h3>
-                        </div>
-                        <p class="text-gray-300 mb-4">
-                            Roblox y creadores hacen eventos especiales donde puedes ganar items gratis y Robux.
-                        </p>
-                        <p class="text-sm text-green-400 font-bold">✔ Fácil si participas rápido</p>
-                    </div>
-
-                </div>
-
-                <div class="neo-glass p-8 mt-14 text-center max-w-4xl mx-auto">
-                    <h3 class="text-3xl font-bold cyber-accent mb-4">
-                        📢 Sigue a SampleRobloxM
-                    </h3>
-
-                    <p class="text-gray-300 text-lg mb-6">
-                        También puedes seguir los sorteos y premios exclusivos que se hacen en mi cuenta de TikTok.
-                    </p>
-
-                    <p class="text-yellow-300 font-bold text-xl mb-6">
-                        🔥 Sorteos activos cada semana 🔥
-                    </p>
-
-                    <a href="https://www.tiktok.com/@samplerobloxm" target="_blank"
-                        class="btn-cyber inline-block px-10 py-4 rounded-xl text-lg font-bold text-white">
-                        <i class="fab fa-tiktok mr-2"></i> Seguir en TikTok
-                    </a>
-
-                    <p class="text-gray-400 text-sm mt-6">
-                        ⚠️ Recuerda: Nunca compartas tu contraseña con nadie.
-                    </p>
-                </div>
-
-            </div>
-        </section>
-
-    </main>
-
-
-    <div id="adminPanel" class="fixed inset-0 bg-black/90 z-50 hidden">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="neo-glass p-8 max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-
-                <div class="flex justify-between items-center mb-8">
-                    <h2 class="text-3xl font-bold titanium-title">Panel de Administración</h2>
-                    <button id="closeAdmin" class="text-gray-400 hover:text-cyan-400 text-2xl transition-colors">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-
-                <div id="adminLogin" class="max-w-md mx-auto">
-                    <h3 class="text-xl font-bold mb-6 cyber-accent">Iniciar Sesión</h3>
-                    <div class="space-y-4">
-                        <input type="text" id="adminUser" placeholder="Usuario"
-                            class="w-full px-4 py-3 rounded-xl text-white bg-black/50 border border-cyan-400/30">
-                        <input type="password" id="adminPass" placeholder="Contraseña"
-                            class="w-full px-4 py-3 rounded-xl text-white bg-black/50 border border-cyan-400/30">
-                        <button id="loginBtn" class="btn-cyber w-full px-6 py-3 rounded-xl font-bold text-white">
-                            Iniciar Sesión
-                        </button>
-                    </div>
-                </div>
-
-                <div id="adminContent" class="hidden">
-
-                    <div class="mb-8 flex flex-wrap gap-3">
-                        <button id="addGameBtn" class="btn-cyber px-6 py-3 rounded-xl font-bold text-white">
-                            <i class="fas fa-plus mr-2"></i> Agregar Juego
-                        </button>
-
-                        <button id="saveChangesBtn" class="btn-cyber px-6 py-3 rounded-xl font-bold text-white">
-                            <i class="fas fa-save mr-2"></i> Guardar Cambios
-                        </button>
-                    </div>
-
-                    <div class="neo-card p-6 mb-8">
-                        <h3 class="text-xl font-bold mb-4 cyber-accent">📢 Sistema de Anuncios</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <textarea id="bannerMessage" placeholder="Ej: 🔥 ¡Nuevos códigos para Blox Fruits! 🔥"
-                                class="px-4 py-3 rounded-xl text-white bg-black/50 border border-cyan-400/30 resize-none h-20"></textarea>
-
-                            <input type="number" id="bannerMinutes" placeholder="Minutos" min="1" max="1440"
-                                class="px-4 py-3 rounded-xl text-white bg-black/50 border border-cyan-400/30">
-
-                            <button id="startBannerBtn" class="btn-cyber px-6 py-3 rounded-xl font-bold text-white">
-                                <i class="fas fa-bullhorn mr-2"></i> Activar
-                            </button>
-
-                            <button id="deleteBannerBtn"
-                                class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-xl font-bold text-white transition-all duration-200">
-                                <i class="fas fa-trash mr-2"></i> Eliminar
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="neo-card p-6 mb-8">
-                        <h3 class="text-xl font-bold mb-4 cyber-accent">➕ Añadir Juego Nuevo</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <input type="text" id="newGameName" placeholder="Nombre del juego"
-                                class="px-4 py-3 rounded-xl text-white bg-black/50 border border-cyan-400/30">
-
-                            <input type="text" id="newGameImage" placeholder="URL de imagen"
-                                class="px-4 py-3 rounded-xl text-white bg-black/50 border border-cyan-400/30">
-
-                            <input type="text" id="newGameCodes" placeholder="Códigos (separados por comas)"
-                                class="px-4 py-3 rounded-xl text-white bg-black/50 border border-cyan-400/30">
-
-                            <button id="quickAddGameBtn" class="btn-cyber px-6 py-3 rounded-xl font-bold text-white">
-                                <i class="fas fa-plus mr-2"></i> Añadir
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="adminGamesList" class="space-y-6"></div>
-
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-
-    <script src="script.js?v=2"></script>
-
-</body>
-
-</html>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --bg-primary: #111111;
+    --bg-secondary: #1a1a1a;
+    --bg-glass: rgba(0, 0, 0, 0.9);
+
+    --border-cyan: #22d3ee;
+    --magenta-cyber: #ec4899;
+    --cyan-electric: #22d3ee;
+
+    --titanium-white: #f8fafc;
+    --text-secondary: #94a3b8;
+
+    --glow-cyan: rgba(34, 211, 238, 0.4);
+    --glow-magenta: rgba(236, 72, 153, 0.4);
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #050505;
+    background-image: url('fondo.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    color: var(--titanium-white);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.section-padding {
+    padding: 4rem 0;
+    position: relative;
+    z-index: 2;
+}
+
+.container-wide {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    position: relative;
+    z-index: 2;
+}
+
+.neo-glass {
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid var(--border-cyan);
+    border-radius: 0.75rem;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
+}
+
+.neo-card {
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+    transform: translateY(0);
+    position: relative;
+    z-index: 2;
+}
+
+.neo-card:hover {
+    border-color: var(--border-cyan);
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(34, 211, 238, 0.3);
+}
+
+.titanium-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    color: var(--titanium-white);
+    text-shadow: 0 0 20px rgba(248, 250, 252, 0.5);
+}
+
+.cyber-accent {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--magenta-cyber), var(--cyan-electric));
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav-cyber {
+    color: var(--titanium-white);
+    text-decoration: none;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-cyber:hover {
+    color: var(--cyan-electric);
+    text-shadow: 0 0 15px var(--glow-cyan);
+    transform: translateY(-1px);
+}
+
+.btn-cyber {
+    background: linear-gradient(135deg, var(--magenta-cyber), var(--cyan-electric));
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    transform: scale(1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-cyber:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(34, 211, 238, 0.4);
+}
+
+.btn-cyber:active {
+    transform: scale(0.95);
+}
+
+.countdown-cyber {
+    font-family: 'Orbitron', monospace;
+    font-size: 6rem;
+    font-weight: 900;
+    color: var(--cyan-electric);
+    text-align: center;
+    letter-spacing: 0.05em;
+    line-height: 1;
+}
+
+.progress-cyber {
+    width: 100%;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 1.5rem;
+    border: 1px solid rgba(34, 211, 238, 0.2);
+}
+
+.progress-cyber-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--magenta-cyber), var(--cyan-electric));
+    transition: width 1s linear;
+    transform-origin: left;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+    background: rgba(0, 0, 0, 0.8) !important;
+    border: 1px solid rgba(34, 211, 238, 0.3) !important;
+    transition: all 0.3s ease !important;
+    color: white !important;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--cyan-electric) !important;
+    box-shadow: 0 0 15px rgba(34, 211, 238, 0.3) !important;
+    background: rgba(0, 0, 0, 0.9) !important;
+    outline: none !important;
+}
+
+.code-cyber-badge {
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--cyan-electric);
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: inline-block;
+    margin: 0.25rem;
+    border: 1px solid rgba(34, 211, 238, 0.2);
+}
+
+.copy-btn {
+    background: rgba(34, 211, 238, 0.15);
+    border: 1px solid rgba(34, 211, 238, 0.4);
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+    background: rgba(34, 211, 238, 0.35);
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.3);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+/* BANNER ANUNCIO MOVIBLE */
+#announcementBanner {
+    border-bottom: 2px solid rgba(34, 211, 238, 0.5);
+    overflow: hidden;
+    position: relative;
+}
+
+#bannerText {
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 100%;
+    animation: marquee 15s linear infinite;
+    font-size: 16px;
+    font-weight: 900;
+    color: #fef08a;
+    text-shadow: 0 0 15px rgba(254, 240, 138, 0.8),
+                 0 0 25px rgba(254, 240, 138, 0.4);
+}
+
+@keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-100%); }
+}
