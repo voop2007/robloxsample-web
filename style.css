@@ -1,278 +1,91 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+/* =======================================================
+   FUENTES Y VARIABLES
+   ======================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght=300;400;600&display=swap');
 
 :root {
-    --bg-primary: #111111;
-    --bg-secondary: #1a1a1a;
-    --bg-glass: rgba(0, 0, 0, 0.9);
-
-    --border-cyan: #22d3ee;
-    --magenta-cyber: #ec4899;
+    --bg-dark: #050505;
     --cyan-electric: #22d3ee;
-
+    --magenta-cyber: #ec4899;
     --titanium-white: #f8fafc;
-    --text-secondary: #94a3b8;
-
-    --glow-cyan: rgba(34, 211, 238, 0.4);
-    --glow-magenta: rgba(236, 72, 153, 0.4);
+    --glass-border: rgba(34, 211, 238, 0.3);
 }
 
+/* =======================================================
+   ESTILOS BASE Y ESTÉTICA GENERAL
+   ======================================================= */
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #050505;
-    background-image: url('fondo.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
+    background-color: var(--bg-dark);
     color: var(--titanium-white);
-    line-height: 1.6;
-    margin: 0;
-    padding: 0;
-    position: relative;
-    overflow-x: hidden;
+    background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('fondo.jpg');
+    background-attachment: fixed;
+    background-size: cover;
 }
 
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 1;
-    pointer-events: none;
-}
-
-.section-padding {
-    padding: 4rem 0;
-    position: relative;
-    z-index: 2;
-}
-
-.container-wide {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1rem;
-    position: relative;
-    z-index: 2;
-}
-
+/* Efectos de Cristal (Glassmorphism) */
 .neo-glass {
-    background: rgba(0, 0, 0, 0.9);
-    border: 1px solid var(--border-cyan);
-    border-radius: 0.75rem;
-    position: relative;
-    z-index: 2;
-    box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--glass-border);
 }
 
-.neo-card {
-    background: rgba(0, 0, 0, 0.9);
-    border: 1px solid rgba(34, 211, 238, 0.3);
-    border-radius: 0.75rem;
-    transition: all 0.3s ease;
-    transform: translateY(0);
-    position: relative;
-    z-index: 2;
-}
-
-.neo-card:hover {
-    border-color: var(--border-cyan);
-    transform: translateY(-2px);
-    box-shadow: 0 0 30px rgba(34, 211, 238, 0.3);
-}
-
+/* Tipografías y Textos */
 .titanium-title {
     font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    color: var(--titanium-white);
-    text-shadow: 0 0 20px rgba(248, 250, 252, 0.5);
-}
-
-.cyber-accent {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 600;
-    background: linear-gradient(135deg, var(--magenta-cyber), var(--cyan-electric));
-    background-clip: text;
+    letter-spacing: 1px;
+    background: linear-gradient(90deg, #fff, #a1a1aa);
     -webkit-background-clip: text;
-    color: transparent;
     -webkit-text-fill-color: transparent;
 }
 
+.countdown-cyber {
+    font-family: 'Orbitron', monospace;
+    color: var(--cyan-electric);
+    text-shadow: 0 0 15px var(--cyan-electric);
+}
+
+/* Botones y Navegación */
 .nav-cyber {
-    color: var(--titanium-white);
-    text-decoration: none;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    position: relative;
+    color: #a1a1aa;
+    font-weight: 600;
+    transition: all 0.2s;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    display: inline-block;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .nav-cyber:hover {
     color: var(--cyan-electric);
-    text-shadow: 0 0 15px var(--glow-cyan);
-    transform: translateY(-1px);
+    background: rgba(34, 211, 238, 0.1);
 }
 
 .btn-cyber {
     background: linear-gradient(135deg, var(--magenta-cyber), var(--cyan-electric));
     color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 600;
-    cursor: pointer;
     transition: all 0.3s ease;
-    transform: scale(1);
-    position: relative;
-    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(34, 211, 238, 0.2);
 }
 
 .btn-cyber:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 25px rgba(34, 211, 238, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
 }
 
-.btn-cyber:active {
-    transform: scale(0.95);
-}
-
-.countdown-cyber {
-    font-family: 'Orbitron', monospace;
-    font-size: 6rem;
-    font-weight: 900;
-    color: var(--cyan-electric);
-    text-align: center;
-    letter-spacing: 0.05em;
-    line-height: 1;
-}
-
-.progress-cyber {
-    width: 100%;
-    height: 12px;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 6px;
-    overflow: hidden;
-    margin-top: 1.5rem;
-    border: 1px solid rgba(34, 211, 238, 0.2);
-}
-
-.progress-cyber-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--magenta-cyber), var(--cyan-electric));
-    transition: width 1s linear;
-    transform-origin: left;
-}
-
-input[type="text"],
-input[type="password"],
-input[type="number"],
-textarea,
-select {
-    background: rgba(0, 0, 0, 0.8) !important;
-    border: 1px solid rgba(34, 211, 238, 0.3) !important;
-    transition: all 0.3s ease !important;
-    color: white !important;
-}
-
-input[type="text"]:focus,
-input[type="password"]:focus,
-input[type="number"]:focus,
-textarea:focus,
-select:focus {
-    border-color: var(--cyan-electric) !important;
-    box-shadow: 0 0 15px rgba(34, 211, 238, 0.3) !important;
-    background: rgba(0, 0, 0, 0.9) !important;
-    outline: none !important;
-}
-
-.code-cyber-badge {
-    background: rgba(0, 0, 0, 0.8);
-    color: var(--cyan-electric);
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.5rem;
-    font-family: 'Orbitron', monospace;
-    font-size: 0.875rem;
-    font-weight: 600;
-    display: inline-block;
-    margin: 0.25rem;
-    border: 1px solid rgba(34, 211, 238, 0.2);
-}
-
-.copy-btn {
-    background: rgba(34, 211, 238, 0.15);
-    border: 1px solid rgba(34, 211, 238, 0.4);
-    padding: 6px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 12px;
-    color: white;
-    transition: all 0.2s ease;
-}
-
-.copy-btn:hover {
-    background: rgba(34, 211, 238, 0.35);
-    box-shadow: 0 0 10px rgba(34, 211, 238, 0.3);
-}
-
-h1, h2, h3, h4, h5, h6 {
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
-}
-
-/* BANNER ANUNCIO MOVIBLE */
-#announcementBanner {
-    border-bottom: 2px solid rgba(34, 211, 238, 0.5);
-    overflow: hidden;
-    position: relative;
-}
-
-#bannerText {
-    display: inline-block;
-    white-space: nowrap;
-    padding-left: 100%;
-    animation: marquee 15s linear infinite;
-    font-size: 16px;
-    font-weight: 900;
-    color: #fef08a;
-    text-shadow: 0 0 15px rgba(254, 240, 138, 0.8),
-                 0 0 25px rgba(254, 240, 138, 0.4);
-}
-
-@keyframes marquee {
-    0% { transform: translateX(0%); }
-    100% { transform: translateX(-100%); }
-}
 /* =======================================================
-   REPARACIÓN DE ESTÉTICA Y NAVEGACIÓN PARA CELULARES
+   REPARACIÓN EXCLUSIVA PARA CELULARES
    ======================================================= */
-
-/* Forzar que el fondo de la página se vea oscuro y cubra todo en celulares */
-body {
-    background-color: #050505 !important;
-    background-attachment: fixed;
-    background-size: cover;
-}
-
-/* Contenedor horizontal suave para que el menú ruede con el dedo en celular */
 .menu-scroll-custom {
     display: flex !important;
     align-items: center;
     overflow-x: auto !important;
     white-space: nowrap;
-    -webkit-overflow-scrolling: touch; /* Deslizamiento nativa en móviles */
-    max-width: 60%; /* Evita que el menú aplaste al logo */
+    -webkit-overflow-scrolling: touch; /* Deslizamiento fluido en móviles */
+    max-width: 60%;
 }
 
-/* Ocultar la barra de scroll de navegación en móviles para mantener la estética limpia */
 .menu-scroll-custom::-webkit-scrollbar {
-    display: none;
-}
-
-/* Asegurar que los botones no se achiquen ni se deformen al deslizar */
-.nav-cyber {
-    display: inline-block;
-    white-space: nowrap;
-    flex-shrink: 0;
+    display: none; /* Oculta la barra de scroll en móviles */
 }
