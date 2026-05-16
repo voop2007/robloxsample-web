@@ -388,4 +388,3 @@ document.getElementById("deleteBannerBtn").addEventListener("click", async () =>
 // ===============================
 fetchJuegos();
 fetchBanner();
-}
