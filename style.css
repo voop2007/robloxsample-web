@@ -244,3 +244,35 @@ h1, h2, h3, h4, h5, h6 {
     0% { transform: translateX(0%); }
     100% { transform: translateX(-100%); }
 }
+/* =======================================================
+   REPARACIÓN DE ESTÉTICA Y NAVEGACIÓN PARA CELULARES
+   ======================================================= */
+
+/* Forzar que el fondo de la página se vea oscuro y cubra todo en celulares */
+body {
+    background-color: #050505 !important;
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+/* Contenedor horizontal suave para que el menú ruede con el dedo en celular */
+.menu-scroll-custom {
+    display: flex !important;
+    align-items: center;
+    overflow-x: auto !important;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch; /* Deslizamiento nativa en móviles */
+    max-width: 60%; /* Evita que el menú aplaste al logo */
+}
+
+/* Ocultar la barra de scroll de navegación en móviles para mantener la estética limpia */
+.menu-scroll-custom::-webkit-scrollbar {
+    display: none;
+}
+
+/* Asegurar que los botones no se achiquen ni se deformen al deslizar */
+.nav-cyber {
+    display: inline-block;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
