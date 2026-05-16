@@ -1,134 +1,391 @@
-// ⚠️ MODIFICA ESTAS DOS LÍNEAS CON TUS CREDENCIALES REALES DE SUPABASE
-const SUPABASE_URL = "https://tu-url-de-supabase.supabase.co"; 
-const SUPABASE_KEY = "tu-clave-anon-publica-aqui";
+const { createClient } = supabase;
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-let todosLosJuegos = [];
+const supabaseClient = createClient(
+    "https://iiuhpmstxosfjnaelfrf.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpdWhwbXN0eG9zZmpuYWVsZnJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTAzODcsImV4cCI6MjA5NDE4NjM4N30.szkMcsCY4cAiD_pm88cuZGgxbRAdYGykbLaSBedYwk0"
+);
 
-// Cambiar de sección / pestañas de manera limpia
+let gamesData = [];
+let countdownInterval = null;
+let bannerTimeout = null;
+
+
+// ===============================
+// SECCIONES
+// ===============================
 function showSection(sectionId) {
-    document.querySelectorAll('.tab-content').forEach(section => {
-        section.classList.add('hidden');
-    });
-    const target = document.getElementById(sectionId);
-    if (target) { 
-        target.classList.remove('hidden'); 
-    }
-
-    if (sectionId === 'juegos') { 
-        fetchJuegos(); 
-    }
+    document.querySelectorAll("main section").forEach(sec => sec.classList.add("hidden"));
+    document.getElementById(sectionId).classList.remove("hidden");
 }
 
-// Lógica del botón de participar del sorteo
-document.getElementById('participarBtn').addEventListener('click', () => {
-    document.getElementById('participarBtn').classList.add('hidden');
-    document.getElementById('countdown').classList.remove('hidden');
-    document.getElementById('progressBar').classList.remove('hidden');
-    
+
+// ===============================
+// CONTADOR PARTICIPAR
+// ===============================
+const participarBtn = document.getElementById("participarBtn");
+const countdown = document.getElementById("countdown");
+const progressBar = document.getElementById("progressBar");
+const progressFill = document.getElementById("progressFill");
+
+function iniciarCuentaRegresiva() {
     let tiempo = 45;
-    const progressFill = document.getElementById('progressFill');
-    
-    const intervalo = setInterval(() => {
+
+    participarBtn.classList.add("hidden");
+    countdown.classList.remove("hidden");
+    progressBar.classList.remove("hidden");
+
+    countdown.textContent = tiempo;
+    progressFill.style.width = "100%";
+
+    if (countdownInterval) clearInterval(countdownInterval);
+
+    countdownInterval = setInterval(() => {
         tiempo--;
-        document.getElementById('countdown').innerText = tiempo;
-        if (progressFill) {
-            progressFill.style.width = `${((45 - tiempo) / 45) * 100}%`;
-        }
-        
+
+        countdown.textContent = tiempo;
+        progressFill.style.width = ((tiempo / 45) * 100) + "%";
+
         if (tiempo <= 0) {
-            clearInterval(intervalo);
-            alert("¡Registrando tu participación en el sorteo!");
+            clearInterval(countdownInterval);
+
+            countdown.classList.add("hidden");
+            progressBar.classList.add("hidden");
+            participarBtn.classList.remove("hidden");
         }
     }, 1000);
-});
+}
 
-// 🔐 ENTRADAS SECRETAS AL PANEL ADMINISTRADOR (EASTER EGGS)
+participarBtn.addEventListener("click", iniciarCuentaRegresiva);
 
-// 1. En PC: Abre al pulsar la tecla F8
-window.addEventListener('keydown', (e) => {
-    if (e.key === 'F8') {
-        e.preventDefault();
-        showSection('adminFormSection');
-    }
-});
 
-// 2. En Celular: Abre al presionar el logo 8 veces seguidas
-let clickContador = 0;
-let temporizadorReset;
-document.getElementById('logoAdminTrigger').addEventListener('click', () => {
-    clickContador++;
-    clearTimeout(temporizadorReset);
-    // Si dejas de pulsar por más de 1.5 segundos, el contador se reinicia
-    temporizadorReset = setTimeout(() => { clickContador = 0; }, 1500);
-
-    if (clickContador === 8) {
-        clickContador = 0;
-        showSection('adminFormSection'); // Abre directo y de forma silenciosa
-    }
-});
-
-// Cargar la información desde la tabla de Supabase
+// ===============================
+// CARGAR JUEGOS DESDE SUPABASE
+// ===============================
 async function fetchJuegos() {
-    const container = document.getElementById('gamesContainer');
     try {
-        const { data: juegos, error } = await supabaseClient.from('juegos').select('*');
-        if (error) throw error;
-        todosLosJuegos = juegos || [];
-        renderGamesList(todosLosJuegos);
+        const { data, error } = await supabaseClient
+            .from("juegos")
+            .select("*")
+            .order("id", { ascending: true });
+
+        if (error) {
+            console.error("Error cargando juegos:", error);
+            gamesData = [];
+        } else {
+            gamesData = data || [];
+        }
+
+        renderGames(gamesData);
+
     } catch (err) {
-        container.innerHTML = `<p class="text-center text-red-400 col-span-full">Error al conectar con la base de datos.</p>`;
+        console.error("Error:", err);
+        gamesData = [];
+        renderGames(gamesData);
     }
 }
 
-// Renderizar las tarjetas de juegos dinámicamente
-function renderGamesList(lista) {
-    const container = document.getElementById('gamesContainer');
-    if (lista.length === 0) {
-        container.innerHTML = `<p class="text-center text-zinc-400 col-span-full py-8">No hay códigos activos en este momento.</p>`;
-        return;
-    }
+
+// ===============================
+// RENDER JUEGOS
+// ===============================
+function renderGames(lista) {
+    const container = document.getElementById("gamesContainer");
     container.innerHTML = "";
-    lista.forEach(juego => {
-        const nombre = juego.nombre || "Juego";
-        const imagen = juego.imagen_url || "https://images.rbxcdn.com/9fbda9da694da83928424fb84236a281.png";
-        const codigo = juego.codigo || "No activo";
-        
-        container.innerHTML += `
-            <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden p-4 shadow-lg">
-                <img src="${imagen}" alt="${nombre}" class="w-full h-40 object-cover rounded-lg mb-3">
-                <h3 class="font-bold text-lg text-white mb-2 truncate">${nombre}</h3>
-                <div class="bg-zinc-950 p-2 rounded border border-zinc-800 flex items-center justify-between">
-                    <code class="text-pink-400 font-mono text-sm font-bold">${codigo}</code>
-                    <button onclick="navigator.clipboard.writeText('${codigo}'); alert('¡Código copiado!');" class="text-zinc-400 hover:text-white text-xs px-2 py-1 bg-zinc-800 rounded">Copiar</button>
-                </div>
-            </div>`;
+
+    lista.forEach(game => {
+        const codesArray = game.codigo ? game.codigo.split(",") : [];
+
+        const card = document.createElement("div");
+        card.className = "neo-card p-6";
+
+        card.innerHTML = `
+            <img src="${game.imagen_url}" class="w-full h-40 object-cover rounded-lg mb-4" alt="${game.nombre}">
+            <h3 class="text-xl font-bold titanium-title mb-2">${game.nombre}</h3>
+            <p class="text-gray-400 text-sm mb-3">${game.descripcion || ""}</p>
+
+            <div class="space-y-2">
+                ${codesArray.map(code => `
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="code-cyber-badge">${code.trim()}</span>
+                        <button class="copy-btn" onclick="copyCode('${code.trim()}')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                `).join("")}
+            </div>
+        `;
+
+        container.appendChild(card);
     });
 }
 
-// Filtrar juegos desde la barra de búsqueda
-function filterGames() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
-    const filtrados = todosLosJuegos.filter(juego => juego.nombre.toLowerCase().includes(query));
-    renderGamesList(filtrados);
+
+// ===============================
+// COPIAR CÓDIGO
+// ===============================
+function copyCode(texto) {
+    navigator.clipboard.writeText(texto);
+    alert("Código copiado: " + texto);
 }
 
-// Enviar nuevos juegos a Supabase desde el panel oculto
-document.getElementById('quickAddGameBtn').addEventListener('click', async () => {
-    const nombre = document.getElementById('newGameName').value;
-    const imagen = document.getElementById('newGameImage').value;
-    const codigo = document.getElementById('newGameCodes').value;
 
-    if (!nombre || !codigo) return;
-    try {
-        const { error } = await supabaseClient.from('juegos').insert([{ nombre, imagen_url: imagen, codigo }]);
-        if (error) throw error;
-        alert("¡Juego guardado con éxito!");
-        document.getElementById('newGameName').value = '';
-        document.getElementById('newGameImage').value = '';
-        document.getElementById('newGameCodes').value = '';
-        showSection('juegos');
-    } catch (err) { 
-        alert("Error: " + err.message); 
+// ===============================
+// BUSCADOR
+// ===============================
+const searchInput = document.getElementById("searchInput");
+
+searchInput.addEventListener("input", () => {
+    const valor = searchInput.value.toLowerCase();
+
+    const filtrados = gamesData.filter(game =>
+        game.nombre.toLowerCase().includes(valor)
+    );
+
+    renderGames(filtrados);
+});
+
+
+// ===============================
+// PANEL ADMIN (F8)
+// ===============================
+const adminBtn = document.getElementById("adminBtn");
+const adminPanel = document.getElementById("adminPanel");
+const closeAdmin = document.getElementById("closeAdmin");
+
+const adminLogin = document.getElementById("adminLogin");
+const adminContent = document.getElementById("adminContent");
+
+const loginBtn = document.getElementById("loginBtn");
+
+// ocultar botón admin
+adminBtn.style.display = "none";
+
+// abrir panel con F8
+document.addEventListener("keydown", (e) => {
+    if (e.key === "F8") {
+        e.preventDefault();
+        adminPanel.classList.remove("hidden");
     }
 });
+
+// cerrar panel admin
+closeAdmin.addEventListener("click", () => {
+    adminPanel.classList.add("hidden");
+});
+
+// login
+loginBtn.addEventListener("click", () => {
+    const user = document.getElementById("adminUser").value;
+    const pass = document.getElementById("adminPass").value;
+
+    if (user === "admin" && pass === "1234") {
+        adminLogin.classList.add("hidden");
+        adminContent.classList.remove("hidden");
+        renderAdminList();
+    } else {
+        alert("Usuario o contraseña incorrectos");
+    }
+});
+
+
+// ===============================
+// ADMIN LIST
+// ===============================
+function renderAdminList() {
+    const adminGamesList = document.getElementById("adminGamesList");
+    adminGamesList.innerHTML = "";
+
+    gamesData.forEach((game, index) => {
+        const div = document.createElement("div");
+        div.className = "neo-card p-6";
+
+        div.innerHTML = `
+            <h3 class="text-lg font-bold mb-4 cyber-accent">Juego #${game.id}</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <input type="text" value="${game.nombre}" class="adminNombre px-4 py-2 rounded-xl text-white bg-black/50 border border-cyan-400/30">
+                <input type="text" value="${game.imagen_url}" class="adminImagen px-4 py-2 rounded-xl text-white bg-black/50 border border-cyan-400/30">
+                <input type="text" value="${game.codigo}" class="adminCodigo px-4 py-2 rounded-xl text-white bg-black/50 border border-cyan-400/30">
+
+                <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl font-bold text-white"
+                    onclick="deleteGame(${index})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+
+        adminGamesList.appendChild(div);
+    });
+}
+
+
+// ===============================
+// DELETE GAME SUPABASE
+// ===============================
+async function deleteGame(index) {
+    const gameId = gamesData[index].id;
+
+    const { error } = await supabaseClient
+        .from("juegos")
+        .delete()
+        .eq("id", gameId);
+
+    if (error) {
+        alert("Error borrando juego");
+        console.error(error);
+        return;
+    }
+
+    fetchJuegos();
+}
+
+
+// ===============================
+// ADD GAME SUPABASE
+// ===============================
+document.getElementById("quickAddGameBtn").addEventListener("click", async () => {
+    const nombre = document.getElementById("newGameName").value;
+    const imagen = document.getElementById("newGameImage").value;
+    const codigos = document.getElementById("newGameCodes").value;
+
+    if (!nombre || !codigos) {
+        alert("Completa nombre y códigos");
+        return;
+    }
+
+    const { error } = await supabaseClient.from("juegos").insert([{
+        nombre: nombre,
+        imagen_url: imagen || "https://via.placeholder.com/300",
+        codigo: codigos,
+        descripcion: "Agregado desde admin",
+        jugadores: 0
+    }]);
+
+    if (error) {
+        alert("Error agregando juego");
+        console.error(error);
+        return;
+    }
+
+    document.getElementById("newGameName").value = "";
+    document.getElementById("newGameImage").value = "";
+    document.getElementById("newGameCodes").value = "";
+
+    fetchJuegos();
+});
+
+
+// ===============================
+// SAVE EDITS SUPABASE
+// ===============================
+document.getElementById("saveChangesBtn").addEventListener("click", async () => {
+    const nombres = document.querySelectorAll(".adminNombre");
+    const imagenes = document.querySelectorAll(".adminImagen");
+    const codigos = document.querySelectorAll(".adminCodigo");
+
+    for (let i = 0; i < gamesData.length; i++) {
+        gamesData[i].nombre = nombres[i].value;
+        gamesData[i].imagen_url = imagenes[i].value;
+        gamesData[i].codigo = codigos[i].value;
+
+        await supabaseClient.from("juegos")
+            .update({
+                nombre: gamesData[i].nombre,
+                imagen_url: gamesData[i].imagen_url,
+                codigo: gamesData[i].codigo
+            })
+            .eq("id", gamesData[i].id);
+    }
+
+    alert("Cambios guardados!");
+    fetchJuegos();
+});
+
+
+// ===============================
+// BANNER SUPABASE
+// ===============================
+async function fetchBanner() {
+    const { data, error } = await supabaseClient
+        .from("anuncios")
+        .select("*")
+        .order("id", { ascending: false })
+        .limit(1);
+
+    if (error) {
+        console.error("Error cargando banner:", error);
+        return;
+    }
+
+    if (data && data.length > 0) {
+        const { mensaje, expira } = data[0];
+
+        const tiempoRestante = expira - Date.now();
+
+        if (tiempoRestante > 0) {
+            document.getElementById("bannerText").textContent = mensaje;
+            document.getElementById("announcementBanner").classList.remove("hidden");
+
+            if (bannerTimeout) clearTimeout(bannerTimeout);
+
+            bannerTimeout = setTimeout(() => {
+                document.getElementById("announcementBanner").classList.add("hidden");
+            }, tiempoRestante);
+        } else {
+            document.getElementById("announcementBanner").classList.add("hidden");
+        }
+    }
+}
+
+
+// activar banner
+document.getElementById("startBannerBtn").addEventListener("click", async () => {
+    const msg = document.getElementById("bannerMessage").value;
+    const minutes = parseInt(document.getElementById("bannerMinutes").value);
+
+    if (!msg || !minutes) {
+        alert("Completa mensaje y minutos");
+        return;
+    }
+
+    const expira = Date.now() + (minutes * 60000);
+
+    const { error } = await supabaseClient
+        .from("anuncios")
+        .insert([{ mensaje: msg, expira: expira }]);
+
+    if (error) {
+        console.error(error);
+        alert("Error guardando banner");
+        return;
+    }
+
+    alert("Banner activado!");
+    fetchBanner();
+});
+
+
+// borrar banner
+document.getElementById("deleteBannerBtn").addEventListener("click", async () => {
+    const { error } = await supabaseClient
+        .from("anuncios")
+        .delete()
+        .not("id", "is", null);
+
+    if (error) {
+        console.error(error);
+        alert("Error eliminando banner");
+        return;
+    }
+
+    document.getElementById("announcementBanner").classList.add("hidden");
+    document.getElementById("bannerText").textContent = "";
+
+    alert("Banner eliminado");
+});
+
+
+// ===============================
+fetchJuegos();
+fetchBanner();
+}
