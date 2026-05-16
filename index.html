@@ -7,23 +7,34 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        .menu-movil-scroll {
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch; /* Suavidad nativa en celulares */
+        }
+        .menu-movil-scroll::-webkit-scrollbar {
+            display: none; /* Oculta la barra fea sin romper el deslizamiento */
+        }
+    </style>
 </head>
 <body>
     <header class="sticky top-0 z-40 neo-glass">
         <div class="container-wide flex items-center justify-between h-16 px-4">
             
-            <div id="logoAdminTrigger" class="flex items-center space-x-4 cursor-pointer select-none">
+            <div id="logoAdminTrigger" class="flex items-center space-x-4 cursor-pointer select-none shrink-0">
                 <div class="w-10 h-10 bg-gradient-to-br from-cyan-electric to-magenta-cyber rounded-lg flex items-center justify-center">
                     <i class="fas fa-gamepad text-white text-lg"></i>
                 </div>
                 <h1 class="text-2xl font-bold titanium-title">RobloxSample</h1>
             </div>
 
-            <nav class="flex items-center space-x-4 overflow-x-auto max-w-[60%] md:max-w-full md:space-x-6 scrollbar-none py-1">
-                <button onclick="showSection('inicio')" class="nav-cyber whitespace-nowrap">Inicio</button>
-                <button onclick="showSection('juegos')" class="nav-cyber whitespace-nowrap">Códigos</button>
-                <button onclick="showSection('ropa')" class="nav-cyber whitespace-nowrap">Ropa</button>
-                <button onclick="showSection('robux')" class="nav-cyber whitespace-nowrap">Robux</button>
+            <nav class="flex items-center space-x-3 menu-movil-scroll ml-4 py-1">
+                <button onclick="showSection('inicio')" class="nav-cyber">Inicio</button>
+                <button onclick="showSection('juegos')" class="nav-cyber">Códigos</button>
+                <button onclick="showSection('ropa')" class="nav-cyber">Ropa</button>
+                <button onclick="showSection('robux')" class="nav-cyber">Robux</button>
             </nav>
 
             </div>
@@ -108,7 +119,6 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let todosLosJuegos = [];
 
-        // Función para alternar pestañas de forma limpia
         function showSection(sectionId) {
             document.querySelectorAll('.tab-content').forEach(section => {
                 section.classList.add('hidden');
@@ -118,9 +128,9 @@
             if(sectionId === 'juegos') { fetchJuegos(); }
         }
 
-        // 🔐 SISTEMA DE ENTRADA AL PANEL SIN ALERTAS NI ANIMACIONES VISIBLES
+        // 🔐 TRUCOS OCULTOS CORREGIDOS
 
-        // 1. En Computadora: Abre presionando la tecla F8
+        // PC: Tecla F8
         window.addEventListener('keydown', (e) => {
             if (e.key === 'F8') {
                 e.preventDefault();
@@ -128,22 +138,21 @@
             }
         });
 
-        // 2. En Celular: Abre presionando el Logo de RobloxSample 8 veces continuas
+        // Celular: 8 Clics en el logo (RobloxSample)
         let clickContador = 0;
         let temporizadorReset;
         document.getElementById('logoAdminTrigger').addEventListener('click', () => {
             clickContador++;
             clearTimeout(temporizadorReset);
-            // Si pasan más de 1.5 segundos sin presionar, se reinicia la cuenta
             temporizadorReset = setTimeout(() => { clickContador = 0; }, 1500);
 
             if (clickContador === 8) {
                 clickContador = 0;
-                showSection('adminFormSection'); // Abre directo y silencioso
+                showSection('adminFormSection');
             }
         });
 
-        // Conexión y Renderizado de Base de Datos para Juegos
+        // Base de datos de juegos
         async function fetchJuegos() {
             const container = document.getElementById('gamesContainer');
             try {
@@ -190,7 +199,6 @@
             renderGamesList(filtrados);
         }
 
-        // Añadir juego a Supabase desde el panel
         document.getElementById('quickAddGameBtn').addEventListener('click', async () => {
             const nombre = document.getElementById('newGameName').value;
             const imagen = document.getElementById('newGameImage').value;
