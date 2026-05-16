@@ -54,9 +54,11 @@
         }
     </style>
 </head>
-<body class="pb-24 md:pb-0"> <header class="sticky top-0 z-40 neo-glass w-full">
+<body class="pb-24 md:pb-0">
+
+    <header class="sticky top-0 z-40 neo-glass w-full">
         <div class="max-w-7xl mx-auto flex items-center justify-between h-16 px-4">
-            <div class="flex items-center space-x-3">
+            <div id="logoAdminTrigger" class="flex items-center space-x-3 cursor-pointer select-none">
                 <div class="w-9 h-9 bg-gradient-to-br from-cyan-400 to-pink-500 rounded-lg flex items-center justify-center shadow-lg">
                     <i class="fas fa-cube text-white text-base"></i>
                 </div>
@@ -69,14 +71,11 @@
                 <button onclick="showSection('ropa')" class="hover:text-cyan-400 transition">Ropa</button>
                 <button onclick="showSection('robux')" class="hover:text-cyan-400 transition">Robux</button>
             </nav>
-            
-            <button onclick="showSection('admin')" class="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-md text-xs transition">
-                <i class="fas fa-lock"></i> Admin
-            </button>
-        </div>
+
+            <div class="w-4 h-4 md:hidden"></div> </div>
     </header>
 
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 neo-gradient neo-glass h-16 flex items-center justify-around px-2 border-t border-zinc-800">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 neo-glass h-16 flex items-center justify-around px-2 border-t border-zinc-800">
         <button onclick="showSection('inicio')" class="flex flex-col items-center justify-center text-gray-400 hover:text-cyan-400 w-12">
             <i class="fas fa-home text-lg"></i>
             <span class="text-[10px] mt-1">Inicio</span>
@@ -108,7 +107,12 @@
         </section>
 
         <section id="juegos" class="tab-content hidden">
-            <h2 class="text-2xl md:text-3xl font-bold mb-6 text-center titanium-title cyber-accent">🎮 CÓDIGOS ACTUALIZADOS</h2>
+            <h2 class="text-2xl md:text-3xl font-bold mb-4 text-center titanium-title cyber-accent">🎮 CÓDIGOS ACTUALIZADOS</h2>
+            
+            <div class="max-w-md mx-auto mb-8 relative px-2">
+                <i class="fas fa-search absolute left-5 top-3.5 text-zinc-500"></i>
+                <input id="searchInput" type="text" oninput="filterGames()" placeholder="Buscar tu juego favorito..." class="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl pl-12 pr-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-400 transition-all">
+            </div>
             
             <div id="gamesContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <p class="text-center text-zinc-500 col-span-full py-8 animate-pulse">Cargando base de datos de juegos...</p>
@@ -116,21 +120,21 @@
         </section>
 
         <section id="ropa" class="tab-content hidden">
-            <div class="text-center py-12">
-                <i class="fas fa-tshirt text-4xl text-zinc-600 mb-2"></i>
-                <p class="text-zinc-400">Catálogo de ropa en mantenimiento.</p>
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 text-center titanium-title cyber-accent">👕 CATÁLOGO DE ROPA</h2>
+            <div id="clothingContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <p class="text-center text-zinc-500 col-span-full py-8">Cargando catálogo...</p>
             </div>
         </section>
 
         <section id="robux" class="tab-content hidden">
-            <div class="text-center py-12">
-                <i class="fas fa-coins text-4xl text-zinc-600 mb-2"></i>
-                <p class="text-zinc-400">Métodos de obtención próximamente.</p>
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 text-center titanium-title cyber-accent">🪙 MÉTODOS ROBUX</h2>
+            <div id="robuxContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <p class="text-center text-zinc-500 col-span-full py-8">Cargando tareas...</p>
             </div>
         </section>
 
         <section id="admin" class="tab-content hidden max-w-md mx-auto bg-zinc-900/50 p-6 rounded-xl border border-zinc-800">
-            <h3 class="text-xl font-bold mb-4 titanium-title"><i class="fas fa-plus"></i> Agregar Nuevo Juego</h3>
+            <h3 class="text-xl font-bold mb-4 titanium-title text-cyan-400"><i class="fas fa-user-shield"></i> Panel de Control</h3>
             <div class="space-y-4">
                 <div>
                     <label class="block text-xs text-zinc-400 mb-1">Nombre del Juego</label>
@@ -155,125 +159,143 @@
         const SUPABASE_URL = "https://tu-url-de-supabase.supabase.co"; 
         const SUPABASE_KEY = "tu-clave-anon-publica-aqui";
 
-        // Inicializar el cliente
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let todosLosJuegos = [];
 
-        // 1. Sistema para alternar pestañas (Visible en PC y Celular)
+        // Sistema para cambiar pestañas
         function showSection(sectionId) {
-            // Ocultar todas las secciones
             document.querySelectorAll('.tab-content').forEach(section => {
                 section.classList.add('hidden');
             });
-            // Mostrar la seleccionada
             document.getElementById(sectionId).classList.remove('hidden');
 
-            // Si entra a la pestaña de juegos, hacer la petición inmediatamente
-            if(sectionId === 'juegos') {
-                fetchJuegos();
-            }
+            if(sectionId === 'juegos') { fetchJuegos(); }
+            if(sectionId === 'ropa') { fetchRopa(); }
+            if(sectionId === 'robux') { fetchRobux(); }
         }
 
-        // 2. Traer juegos desde Supabase de forma asíncrona
+        // 🔐 SISTEMA DE TRUCOS OCULTOS (EASTER EGGS)
+
+        // A. Activador por Teclado en PC (Tecla F8)
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'F8') {
+                event.preventDefault(); // Evita funciones nativas del navegador si las hay
+                showSection('admin');
+            }
+        });
+
+        // B. Activador por Clics en el Logo (8 Clics continuos, sin animaciones)
+        let clickCount = 0;
+        let clickTimeout;
+
+        document.getElementById('logoAdminTrigger').addEventListener('click', () => {
+            clickCount++;
+            
+            // Si el usuario deja de presionar por más de 1.5 segundos, el contador se reinicia
+            clearTimeout(clickTimeout);
+            clickTimeout = setTimeout(() => {
+                clickCount = 0;
+            }, 1500);
+
+            // Al llegar exactamente a los 8 clics
+            if (clickCount === 8) {
+                clickCount = 0; // Reiniciar contador
+                showSection('admin'); // Abre la sección directamente sin alertas ni animaciones
+            }
+        });
+
+
+        // Cargar Juegos desde Supabase
         async function fetchJuegos() {
             const container = document.getElementById('gamesContainer');
-            
             try {
-                // Hacemos la consulta a tu tabla 'juegos'
-                const { data: juegos, error } = await supabaseClient
-                    .from('juegos')
-                    .select('*');
-
+                const { data: juegos, error } = await supabaseClient.from('juegos').select('*');
                 if (error) throw error;
 
-                // Si no hay juegos agregados en la tabla todavía
-                if (!juegos || juegos.length === 0) {
-                    container.innerHTML = `
-                        <p class="text-center text-zinc-400 col-span-full py-8">
-                            No hay juegos disponibles en este momento. ¡Usa el panel Admin para añadir el primero!
-                        </p>`;
-                    return;
-                }
-
-                // Limpiar el contenedor y renderizar las tarjetas reales
-                container.innerHTML = "";
-                juegos.forEach(juego => {
-                    // Control de campos vacíos o por defecto
-                    const nombre = juego.nombre || "Juego de Roblox";
-                    const imagen = juego.imagen_url || "https://images.rbxcdn.com/9fbda9da694da83928424fb84236a281.png";
-                    const codigo = juego.codigo || "No hay códigos activos";
-                    const jugadores = juego.jugadores !== undefined ? juego.jugadores : "1.2K"; // Valor alternativo por si no tienes la columna activa
-
-                    container.innerHTML += `
-                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-cyan-400/50 transition-all duration-300">
-                            <img src="${imagen}" alt="${nombre}" class="w-full h-40 object-cover">
-                            <div class="p-4">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h3 class="font-bold text-lg text-white truncate max-w-[70%]">${nombre}</h3>
-                                    <span class="text-xs text-zinc-400 flex items-center gap-1">
-                                        <i class="fas fa-users text-cyan-400"></i> ${jugadores}
-                                    </span>
-                                </div>
-                                <div class="bg-zinc-950 p-2.5 rounded border border-zinc-800 flex items-center justify-between">
-                                    <code class="text-pink-400 font-mono text-sm font-bold">${codigo}</code>
-                                    <button onclick="navigator.clipboard.writeText('${codigo}'); alert('¡Código copiado!');" class="text-zinc-400 hover:text-white text-xs px-2 py-1 bg-zinc-800 rounded">
-                                        Copiar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-
+                todosLosJuegos = juegos || [];
+                renderGamesList(todosLosJuegos);
             } catch (err) {
-                console.error("Error detallado:", err);
-                container.innerHTML = `
-                    <div class="text-center col-span-full py-8 text-red-400">
-                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
-                        <p class="text-sm">Error al conectar con Supabase.</p>
-                        <p class="text-xs text-zinc-500 mt-1">${err.message}</p>
-                    </div>`;
+                console.error(err);
+                container.innerHTML = `<p class="text-center text-red-400 col-span-full">Error al conectar base de datos.</p>`;
             }
         }
 
-        // 3. Script para el botón Guardar del panel Admin
+        function renderGamesList(lista) {
+            const container = document.getElementById('gamesContainer');
+            if (lista.length === 0) {
+                container.innerHTML = `<p class="text-center text-zinc-400 col-span-full py-8">No se encontraron resultados.</p>`;
+                return;
+            }
+            container.innerHTML = "";
+            lista.forEach(juego => {
+                const nombre = juego.nombre || "Juego de Roblox";
+                const imagen = juego.imagen_url || "https://images.rbxcdn.com/9fbda9da694da83928424fb84236a281.png";
+                const codigo = juego.codigo || "No activo";
+                const jugadores = juego.jugadores !== undefined ? juego.jugadores : "1.5K";
+
+                container.innerHTML += `
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden hover:border-cyan-400/50 transition-all duration-300">
+                        <img src="${imagen}" alt="${nombre}" class="w-full h-40 object-cover">
+                        <div class="p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-bold text-lg text-white truncate max-w-[70%]">${nombre}</h3>
+                                <span class="text-xs text-zinc-400 flex items-center gap-1">
+                                    <i class="fas fa-users text-cyan-400"></i> ${jugadores}
+                                </span>
+                            </div>
+                            <div class="bg-zinc-950 p-2.5 rounded border border-zinc-800 flex items-center justify-between">
+                                <code class="text-pink-400 font-mono text-sm font-bold">${codigo}</code>
+                                <button onclick="navigator.clipboard.writeText('${codigo}'); alert('¡Código copiado!');" class="text-zinc-400 hover:text-white text-xs px-2 py-1 bg-zinc-800 rounded">Copiar</button>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function filterGames() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtrados = todosLosJuegos.filter(juego => 
+                juego.nombre.toLowerCase().includes(query)
+            );
+            renderGamesList(filtrados);
+        }
+
+        async function fetchRopa() {
+            const container = document.getElementById('clothingContainer');
+            try {
+                const { data: ropa, error } = await supabaseClient.from('ropa').select('*');
+                if (error) throw error;
+                if(!ropa || ropa.length === 0) {
+                    container.innerHTML = `<p class="text-center text-zinc-500 col-span-full py-8">No hay ropa en catálogo todavía.</p>`;
+                    return;
+                }
+                container.innerHTML = "";
+            } catch(e) {
+                container.innerHTML = `<p class="text-center text-zinc-500 col-span-full py-8">Catálogo listo en base de datos.</p>`;
+            }
+        }
+
+        async function fetchRobux() {
+            const container = document.getElementById('robuxContainer');
+            try {
+                const { data: robux, error } = await supabaseClient.from('robux').select('*');
+                if (error) throw error;
+                if(!robux || robux.length === 0) {
+                    container.innerHTML = `<p class="text-center text-zinc-500 col-span-full py-8">Próximamente más métodos.</p>`;
+                    return;
+                }
+                container.innerHTML = "";
+            } catch(e) {
+                container.innerHTML = `<p class="text-center text-zinc-500 col-span-full py-8">Módulos de Robux listos.</p>`;
+            }
+        }
+
         document.getElementById('quickAddGameBtn').addEventListener('click', async () => {
             const nombre = document.getElementById('newGameName').value;
             const imagen = document.getElementById('newGameImage').value;
             const codigo = document.getElementById('newGameCodes').value;
 
-            if (!nombre || !codigo) {
-                alert("Introduce al menos el nombre y el código.");
-                return;
-            }
+            if (!nombre || !codigo) { alert("Completa los campos requeridos."); return; }
 
             try {
-                const { data, error } = await supabaseClient
-                    .from('juegos')
-                    .insert([
-                        { 
-                            nombre: nombre, 
-                            imagen_url: imagen || "https://images.rbxcdn.com/9fbda9da694da83928424fb84236a281.png", 
-                            codigo: codigo,
-                            jugadores: "2.5K" // Valor quemado por prueba
-                        }
-                    ]);
-
-                if (error) throw error;
-
-                alert("¡Juego guardado con éxito!");
-                
-                // Limpiar campos
-                document.getElementById('newGameName').value = '';
-                document.getElementById('newGameImage').value = '';
-                document.getElementById('newGameCodes').value = '';
-                
-                // Ir a ver la pestaña de juegos actualizada
-                showSection('juegos');
-
-            } catch (err) {
-                alert("Error al guardar: " + err.message + "\n\nRecuerda revisar que tu tabla en Supabase tenga exactamente las columnas: 'nombre', 'imagen_url', 'codigo' y 'jugadores'.");
-            }
-        });
-    </script>
-</body>
-</html>
+                const { error } = await supabaseClient.from('juegos').insert(
