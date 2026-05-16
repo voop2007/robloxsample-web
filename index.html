@@ -19,7 +19,7 @@
                 <h1 class="text-2xl font-bold titanium-title">RobloxSample</h1>
             </div>
 
-            <nav class="flex items-center space-x-4 md:space-x-6 overflow-x-auto max-w-[55%] md:max-w-full py-1 scrollbar-none">
+            <nav class="flex items-center space-x-3 overflow-x-auto max-w-[60%] md:max-w-full md:space-x-6 py-1 scrollbar-none">
                 <button onclick="showSection('inicio')" class="nav-cyber whitespace-nowrap">Inicio</button>
                 <button onclick="showSection('juegos')" class="nav-cyber whitespace-nowrap">Códigos</button>
                 <button onclick="showSection('ropa')" class="nav-cyber whitespace-nowrap">Ropa</button>
@@ -62,55 +62,53 @@
             </div>
         </section>
 
-        <section id="ropa" class="section-padding tab-content hidden">
+        <section id="ropa" class="tab-content hidden section-padding">
             <div class="container-wide text-center">
                 <h2 class="text-4xl font-bold mb-6 titanium-title">👕 Ropa Limitada</h2>
                 <div id="clothingContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <p class="text-center text-zinc-500 col-span-full py-8">Próximamente catálogo de ropa...</p>
-                </div>
+                    </div>
             </div>
         </section>
 
-        <section id="robux" class="section-padding tab-content hidden">
+        <section id="robux" class="tab-content hidden section-padding">
             <div class="container-wide text-center">
                 <h2 class="text-4xl font-bold mb-6 titanium-title">🪙 Conseguir Robux</h2>
                 <div id="robuxContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <p class="text-center text-zinc-500 col-span-full py-8">Próximamente nuevos métodos...</p>
-                </div>
+                    </div>
             </div>
         </section>
 
-        <section id="adminFormSection" class="section-padding tab-content hidden">
+        <section id="adminFormSection" class="tab-content hidden section-padding">
             <div class="max-w-md mx-auto bg-zinc-900 p-6 rounded-xl border border-zinc-800 neo-glass">
                 <h3 class="text-xl font-bold mb-4 titanium-title"><i class="fas fa-user-shield"></i> Panel Administrador</h3>
                 <div class="space-y-4 text-left">
                     <div>
                         <label class="block text-xs text-zinc-400 mb-1">Nombre del Juego</label>
-                        <input id="newGameName" type="text" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none">
+                        <input id="newGameName" type="text" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white">
                     </div>
                     <div>
                         <label class="block text-xs text-zinc-400 mb-1">URL de la Imagen</label>
-                        <input id="newGameImage" type="text" placeholder="https://..." class="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none">
+                        <input id="newGameImage" type="text" placeholder="https://..." class="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white">
                     </div>
                     <div>
                         <label class="block text-xs text-zinc-400 mb-1">Código Promocional</label>
-                        <input id="newGameCodes" type="text" placeholder="Ej: KRAKEN2026" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white focus:outline-none">
+                        <input id="newGameCodes" type="text" placeholder="Ej: KRAKEN2026" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2 text-sm text-white">
                     </div>
-                    <button id="quickAddGameBtn" class="w-full btn-cyber py-2 rounded font-bold text-sm">Guardar en Supabase</button>
+                    <button id="quickAddGameBtn" class="w-full btn-cyber py-2 rounded font-bold text-sm">Guardar en Base de Datos</button>
                 </div>
             </div>
         </section>
     </main>
 
     <script>
-        // ⚠️ COLOCA AQUÍ TUS CREDENCIALES DE SUPABASE
+        // ⚠️ REEMPLAZA ESTOS DATOS CON LOS DE TU PROYECTO REAL DE SUPABASE
         const SUPABASE_URL = "https://tu-url-de-supabase.supabase.co"; 
         const SUPABASE_KEY = "tu-clave-anon-publica-aqui";
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let todosLosJuegos = [];
 
-        // Cambiar de pestaña de manera limpia
+        // Sistema de pestañas
         function showSection(sectionId) {
             document.querySelectorAll('.tab-content').forEach(section => {
                 section.classList.add('hidden');
@@ -120,7 +118,7 @@
             if(sectionId === 'juegos') { fetchJuegos(); }
         }
 
-        // 🔐 ACCESOS SECRETOS AL PANEL (EASTER EGGS)
+        // 🔐 ACCESOS OCULTOS AL PANEL ADMIN SOLICITADOS
         
         // PC: Tecla F8
         window.addEventListener('keydown', (e) => {
@@ -130,21 +128,22 @@
             }
         });
 
-        // Celular: 8 clics en el logo de RobloxSample
-        let clicks = 0;
-        let clickTimeout;
+        // Celular: 8 Clics continuos en el logo (RobloxSample)
+        let clickContador = 0;
+        let temporizadorReset;
         document.getElementById('logoAdminTrigger').addEventListener('click', () => {
-            clicks++;
-            clearTimeout(clickTimeout);
-            clickTimeout = setTimeout(() => { clicks = 0; }, 1500);
+            clickContador++;
+            clearTimeout(temporizadorReset);
+            // Si el usuario deja de presionar por más de 1.5 segundos, el contador se reinicia
+            temporizadorReset = setTimeout(() => { clickContador = 0; }, 1500);
 
-            if (clicks === 8) {
-                clicks = 0;
+            if (clickContador === 8) {
+                clickContador = 0;
                 showSection('adminFormSection');
             }
         });
 
-        // Traer la información real de Supabase
+        // Cargar juegos desde Supabase
         async function fetchJuegos() {
             const container = document.getElementById('gamesContainer');
             try {
@@ -153,11 +152,11 @@
                 todosLosJuegos = juegos || [];
                 renderGamesList(todosLosJuegos);
             } catch (err) {
-                container.innerHTML = `<p class="text-center text-red-400 col-span-full">Error al conectar con la base de datos.</p>`;
+                container.innerHTML = `<p class="text-center text-red-400 col-span-full">Error al conectar base de datos.</p>`;
             }
         }
 
-        // Dibujar las tarjetas con tu diseño e iconos intactos
+        // Renderizado de tarjetas dinámicas con tu diseño original
         function renderGamesList(lista) {
             const container = document.getElementById('gamesContainer');
             if (lista.length === 0) {
@@ -186,14 +185,14 @@
             });
         }
 
-        // Buscar en tiempo real
+        // Función de búsqueda
         function filterGames() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const filtrados = todosLosJuegos.filter(juego => juego.nombre.toLowerCase().includes(query));
             renderGamesList(filtrados);
         }
 
-        // Guardar juego desde el Panel Admin
+        // Guardar juego desde Panel Admin Oculto
         document.getElementById('quickAddGameBtn').addEventListener('click', async () => {
             const nombre = document.getElementById('newGameName').value;
             const imagen = document.getElementById('newGameImage').value;
@@ -208,7 +207,7 @@
                 document.getElementById('newGameImage').value = '';
                 document.getElementById('newGameCodes').value = '';
                 showSection('juegos');
-            } catch (err) { alert("Error: " + err.message); }
+            } catch (err) { alert("Error al guardar: " + err.message); }
         });
     </script>
 </body>
