@@ -9,6 +9,7 @@ const supabaseClient = createClient(
 );
 
 let gamesData = [];
+let newsData = [];
 let countdownInterval = null;
 let bannerTimeout = null;
 
@@ -38,6 +39,7 @@ function iniciarCuentaRegresiva() {
   const progressBar = document.getElementById("progressBar");
   const progressFill = document.getElementById("progressFill");
   const userForm = document.getElementById("userForm");
+  const userSavedMsg = document.getElementById("userSavedMsg");
 
   if (!participarBtn || !countdown || !progressBar || !progressFill) return;
 
@@ -51,6 +53,7 @@ function iniciarCuentaRegresiva() {
   progressFill.style.width = "100%";
 
   if (userForm) userForm.classList.add("hidden");
+  if (userSavedMsg) userSavedMsg.classList.add("hidden");
 
   if (countdownInterval) clearInterval(countdownInterval);
 
@@ -159,7 +162,10 @@ function renderGames(lista) {
       <div class="space-y-2">
         ${codesArray.map(code => `
           <div class="flex items-center justify-between gap-2">
-            <span class="code-cyber-badge">${code.trim()}</span>
+            <span class="code-cyber-badge" style="max-width: 75%; overflow-wrap: break-word; word-break: break-word; white-space: normal;">
+              ${code.trim()}
+            </span>
+
             <button class="btn-cyber px-3 py-2 rounded-lg text-sm" onclick="copyCode('${code.trim()}')">
               <i class="fas fa-copy"></i>
             </button>
@@ -230,7 +236,9 @@ function configurarAdminPanel() {
       if (user === "admin" && pass === "1234") {
         if (adminLogin) adminLogin.classList.add("hidden");
         if (adminContent) adminContent.classList.remove("hidden");
+
         renderAdminList();
+        fetchNoticias();
       } else {
         alert("Usuario o contraseña incorrectos");
       }
@@ -240,7 +248,7 @@ function configurarAdminPanel() {
 
 
 // ===============================
-// ADMIN LIST
+// ADMIN LIST JUEGOS
 // ===============================
 function renderAdminList() {
   const adminGamesList = document.getElementById("adminGamesList");
@@ -282,7 +290,7 @@ function renderAdminList() {
 
 
 // ===============================
-// DELETE GAME SUPABASE (FIXED)
+// DELETE GAME SUPABASE
 // ===============================
 async function deleteGame(gameId) {
   const confirmar = confirm("¿Seguro que quieres eliminar este juego?");
@@ -366,6 +374,172 @@ async function saveChanges() {
 
   alert("Cambios guardados!");
   fetchJuegos();
+}
+
+
+// ===============================
+// NOTICIAS SUPABASE
+// ===============================
+async function fetchNoticias() {
+  try {
+    const { data, error } = await supabaseClient
+      .from("noticias")
+      .select("*")
+      .order("id", { ascending: false });
+
+    if (error) {
+      console.error("Error cargando noticias:", error);
+      newsData = [];
+    } else {
+      newsData = data || [];
+    }
+
+    renderNoticias();
+    renderAdminNoticias();
+
+  } catch (err) {
+    console.error("Error:", err);
+    newsData = [];
+    renderNoticias();
+  }
+}
+
+
+// ===============================
+// RENDER NOTICIAS EN SECCION
+// ===============================
+function renderNoticias() {
+  const container = document.getElementById("newsContainer");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (!newsData || newsData.length === 0) {
+    container.innerHTML = `
+      <div class="neo-card p-6 text-center col-span-full">
+        <h3 class="text-xl font-bold cyber-accent mb-2">No hay noticias aún</h3>
+        <p class="text-gray-400">Agrega noticias desde el panel admin (F8).</p>
+      </div>
+    `;
+    return;
+  }
+
+  newsData.forEach(n => {
+    const card = document.createElement("div");
+    card.className = "neo-card overflow-hidden";
+
+    card.innerHTML = `
+      <img src="${n.imagen_url}" class="w-full h-48 object-cover" alt="${n.titulo}">
+      <div class="p-6">
+        <h3 class="text-xl font-bold titanium-title mb-2">${n.titulo}</h3>
+        <p class="text-gray-300 text-sm mb-4" style="white-space: pre-line;">${n.contenido}</p>
+        <p class="text-xs text-gray-500">Publicado</p>
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+
+// ===============================
+// RENDER NOTICIAS EN ADMIN
+// ===============================
+function renderAdminNoticias() {
+  const adminNewsList = document.getElementById("adminNewsList");
+  if (!adminNewsList) return;
+
+  adminNewsList.innerHTML = "";
+
+  if (!newsData || newsData.length === 0) {
+    adminNewsList.innerHTML = `
+      <div class="neo-card p-4 text-center">
+        <p class="text-gray-400">No hay noticias publicadas.</p>
+      </div>
+    `;
+    return;
+  }
+
+  newsData.forEach(n => {
+    const div = document.createElement("div");
+    div.className = "neo-card p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4";
+
+    div.innerHTML = `
+      <div class="flex items-center gap-4">
+        <img src="${n.imagen_url}" class="w-20 h-20 object-cover rounded-lg border border-cyan-400/30">
+        <div>
+          <h4 class="font-bold text-white">${n.titulo}</h4>
+          <p class="text-gray-400 text-sm" style="max-width: 400px; overflow-wrap: break-word;">
+            ${n.contenido.substring(0, 80)}...
+          </p>
+        </div>
+      </div>
+
+      <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl font-bold text-white"
+        onclick="deleteNews(${n.id})">
+        <i class="fas fa-trash"></i> Eliminar
+      </button>
+    `;
+
+    adminNewsList.appendChild(div);
+  });
+}
+
+
+// ===============================
+// ADD NOTICIA SUPABASE
+// ===============================
+async function addNoticia() {
+  const titulo = document.getElementById("newsTitle").value.trim();
+  const imagen = document.getElementById("newsImage").value.trim();
+  const contenido = document.getElementById("newsContent").value.trim();
+
+  if (!titulo || !contenido) {
+    alert("Completa el título y el contenido");
+    return;
+  }
+
+  const { error } = await supabaseClient.from("noticias").insert([{
+    titulo: titulo,
+    imagen_url: imagen || "https://via.placeholder.com/512",
+    contenido: contenido
+  }]);
+
+  if (error) {
+    alert("Error agregando noticia");
+    console.error(error);
+    return;
+  }
+
+  document.getElementById("newsTitle").value = "";
+  document.getElementById("newsImage").value = "";
+  document.getElementById("newsContent").value = "";
+
+  alert("Noticia publicada!");
+  fetchNoticias();
+}
+
+
+// ===============================
+// DELETE NOTICIA
+// ===============================
+async function deleteNews(newsId) {
+  const confirmar = confirm("¿Seguro que quieres eliminar esta noticia?");
+  if (!confirmar) return;
+
+  const { error } = await supabaseClient
+    .from("noticias")
+    .delete()
+    .eq("id", newsId);
+
+  if (error) {
+    alert("Error eliminando noticia");
+    console.error(error);
+    return;
+  }
+
+  alert("Noticia eliminada!");
+  fetchNoticias();
 }
 
 
@@ -464,6 +638,7 @@ async function borrarBanner() {
 window.showSection = showSection;
 window.copyCode = copyCode;
 window.deleteGame = deleteGame;
+window.deleteNews = deleteNews;
 
 
 // ===============================
@@ -525,8 +700,14 @@ document.addEventListener("DOMContentLoaded", () => {
     deleteBannerBtn.addEventListener("click", borrarBanner);
   }
 
+  const addNewsBtn = document.getElementById("addNewsBtn");
+  if (addNewsBtn) {
+    addNewsBtn.addEventListener("click", addNoticia);
+  }
+
   // Cargar datos
   fetchJuegos();
   fetchBanner();
+  fetchNoticias();
 
 });
