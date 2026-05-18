@@ -1,3 +1,6 @@
+// ===============================
+// SUPABASE CONFIG
+// ===============================
 const { createClient } = supabase;
 
 const supabaseClient = createClient(
@@ -5,9 +8,54 @@ const supabaseClient = createClient(
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpdWhwbXN0eG9zZmpuYWVsZnJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTAzODcsImV4cCI6MjA5NDE4NjM4N30.szkMcsCY4cAiD_pm88cuZGgxbRAdYGykbLaSBedYwk0"
 );
 
+// ===============================
+// VARIABLES
+// ===============================
 let gamesData = [];
 let countdownInterval = null;
 let bannerTimeout = null;
+
+
+// ===============================
+// JUEGOS EJEMPLO (PARA CARGAR A SUPABASE)
+// ===============================
+const juegosEjemplo = [
+    {
+        nombre: "Blox Fruits",
+        codigo: "SUB2GAMERROBOT,ADMIN,STRAWHATMAINEE",
+        imagen_url: "https://tr.rbxcdn.com/180DAY-5dcebd40eeb92d2b63c8799f7dc2a0cb/512/512/Image/Png/noFilter",
+        descripcion: "Uno de los juegos mas populares de Roblox",
+        jugadores: 1500000
+    },
+    {
+        nombre: "Brookhaven RP",
+        codigo: "BROOKHAVEN,RP2025,FREECASH",
+        imagen_url: "https://tr.rbxcdn.com/180DAY-0d20b3c8edb946b2f4b27b6c2c78e8c7/512/512/Image/Png/noFilter",
+        descripcion: "Juego de roleplay con casas, autos y ciudades",
+        jugadores: 1200000
+    },
+    {
+        nombre: "Pet Simulator 99",
+        codigo: "FREEPET,DIAMONDS99,LUCKY",
+        imagen_url: "https://tr.rbxcdn.com/180DAY-b6d1d1d1dfedca56a76a4d3c49d0b2c9/512/512/Image/Png/noFilter",
+        descripcion: "Colecciona mascotas y gana recompensas",
+        jugadores: 900000
+    },
+    {
+        nombre: "Adopt Me",
+        codigo: "ADOPTME,FREEPET2025,REWARD",
+        imagen_url: "https://tr.rbxcdn.com/180DAY-0d8d2e84f75a9ed3cb04b03a6edb1b73/512/512/Image/Png/noFilter",
+        descripcion: "Adopta mascotas y vive en una ciudad",
+        jugadores: 800000
+    },
+    {
+        nombre: "Tower of Hell",
+        codigo: "TOH2025,FREEXP,LEVELUP",
+        imagen_url: "https://tr.rbxcdn.com/180DAY-8f8cfb03d9f2a0cf1d2c4c12b3f5d2b4/512/512/Image/Png/noFilter",
+        descripcion: "Supera torres imposibles y mejora tu habilidad",
+        jugadores: 600000
+    }
+];
 
 
 // ===============================
@@ -86,7 +134,7 @@ async function fetchJuegos() {
 
 
 // ===============================
-// RENDER JUEGOS
+// RENDER JUEGOS + BOTÓN COPIAR
 // ===============================
 function renderGames(lista) {
     const container = document.getElementById("gamesContainer");
@@ -134,19 +182,21 @@ function copyCode(texto) {
 // ===============================
 const searchInput = document.getElementById("searchInput");
 
-searchInput.addEventListener("input", () => {
-    const valor = searchInput.value.toLowerCase();
+if (searchInput) {
+    searchInput.addEventListener("input", () => {
+        const valor = searchInput.value.toLowerCase();
 
-    const filtrados = gamesData.filter(game =>
-        game.nombre.toLowerCase().includes(valor)
-    );
+        const filtrados = gamesData.filter(game =>
+            game.nombre.toLowerCase().includes(valor)
+        );
 
-    renderGames(filtrados);
-});
+        renderGames(filtrados);
+    });
+}
 
 
 // ===============================
-// PANEL ADMIN (F8)
+// PANEL ADMIN OCULTO (F8)
 // ===============================
 const adminBtn = document.getElementById("adminBtn");
 const adminPanel = document.getElementById("adminPanel");
@@ -158,9 +208,9 @@ const adminContent = document.getElementById("adminContent");
 const loginBtn = document.getElementById("loginBtn");
 
 // ocultar botón admin
-adminBtn.style.display = "none";
+if (adminBtn) adminBtn.style.display = "none";
 
-// abrir panel con F8
+// abrir con F8
 document.addEventListener("keydown", (e) => {
     if (e.key === "F8") {
         e.preventDefault();
@@ -169,27 +219,31 @@ document.addEventListener("keydown", (e) => {
 });
 
 // cerrar panel admin
-closeAdmin.addEventListener("click", () => {
-    adminPanel.classList.add("hidden");
-});
+if (closeAdmin) {
+    closeAdmin.addEventListener("click", () => {
+        adminPanel.classList.add("hidden");
+    });
+}
 
 // login
-loginBtn.addEventListener("click", () => {
-    const user = document.getElementById("adminUser").value;
-    const pass = document.getElementById("adminPass").value;
+if (loginBtn) {
+    loginBtn.addEventListener("click", () => {
+        const user = document.getElementById("adminUser").value;
+        const pass = document.getElementById("adminPass").value;
 
-    if (user === "admin" && pass === "1234") {
-        adminLogin.classList.add("hidden");
-        adminContent.classList.remove("hidden");
-        renderAdminList();
-    } else {
-        alert("Usuario o contraseña incorrectos");
-    }
-});
+        if (user === "admin" && pass === "1234") {
+            adminLogin.classList.add("hidden");
+            adminContent.classList.remove("hidden");
+            renderAdminList();
+        } else {
+            alert("Usuario o contraseña incorrectos");
+        }
+    });
+}
 
 
 // ===============================
-// ADMIN LIST
+// ADMIN LISTA EDITABLE
 // ===============================
 function renderAdminList() {
     const adminGamesList = document.getElementById("adminGamesList");
@@ -220,7 +274,7 @@ function renderAdminList() {
 
 
 // ===============================
-// DELETE GAME SUPABASE
+// ELIMINAR JUEGO EN SUPABASE
 // ===============================
 async function deleteGame(index) {
     const gameId = gamesData[index].id;
@@ -241,7 +295,7 @@ async function deleteGame(index) {
 
 
 // ===============================
-// ADD GAME SUPABASE
+// AGREGAR JUEGO EN SUPABASE
 // ===============================
 document.getElementById("quickAddGameBtn").addEventListener("click", async () => {
     const nombre = document.getElementById("newGameName").value;
@@ -276,7 +330,7 @@ document.getElementById("quickAddGameBtn").addEventListener("click", async () =>
 
 
 // ===============================
-// SAVE EDITS SUPABASE
+// GUARDAR EDITS EN SUPABASE
 // ===============================
 document.getElementById("saveChangesBtn").addEventListener("click", async () => {
     const nombres = document.querySelectorAll(".adminNombre");
@@ -303,36 +357,42 @@ document.getElementById("saveChangesBtn").addEventListener("click", async () => 
 
 
 // ===============================
-// BANNER SUPABASE
+// FUNCIÓN NUEVA: CARGAR EJEMPLOS EN SUPABASE
+// ===============================
+async function cargarEjemplosEnSupabase() {
+    const confirmar = confirm("¿Quieres cargar juegos ejemplo en Supabase?");
+    if (!confirmar) return;
+
+    for (let juego of juegosEjemplo) {
+        await supabaseClient.from("juegos").insert([juego]);
+    }
+
+    alert("Juegos ejemplo cargados!");
+    fetchJuegos();
+}
+
+
+// ===============================
+// BANNER ADMIN EN SUPABASE
 // ===============================
 async function fetchBanner() {
-    const { data, error } = await supabaseClient
+    const { data } = await supabaseClient
         .from("anuncios")
         .select("*")
         .order("id", { ascending: false })
         .limit(1);
 
-    if (error) {
-        console.error("Error cargando banner:", error);
-        return;
-    }
-
-    if (data && data.length > 0) {
+    if (data && data.length) {
         const { mensaje, expira } = data[0];
 
         const tiempoRestante = expira - Date.now();
-
         if (tiempoRestante > 0) {
             document.getElementById("bannerText").textContent = mensaje;
             document.getElementById("announcementBanner").classList.remove("hidden");
 
-            if (bannerTimeout) clearTimeout(bannerTimeout);
-
             bannerTimeout = setTimeout(() => {
                 document.getElementById("announcementBanner").classList.add("hidden");
             }, tiempoRestante);
-        } else {
-            document.getElementById("announcementBanner").classList.add("hidden");
         }
     }
 }
@@ -344,44 +404,23 @@ document.getElementById("startBannerBtn").addEventListener("click", async () => 
     const minutes = parseInt(document.getElementById("bannerMinutes").value);
 
     if (!msg || !minutes) {
-        alert("Completa mensaje y minutos");
+        alert("Completa el mensaje y minutos.");
         return;
     }
 
-    const expira = Date.now() + (minutes * 60000);
+    const expira = Date.now() + minutes * 60000;
 
-    const { error } = await supabaseClient
-        .from("anuncios")
-        .insert([{ mensaje: msg, expira: expira }]);
+    await supabaseClient.from("anuncios").insert([{ mensaje: msg, expira }]);
 
-    if (error) {
-        console.error(error);
-        alert("Error guardando banner");
-        return;
-    }
-
-    alert("Banner activado!");
+    alert("Banner guardado!");
     fetchBanner();
 });
 
 
 // borrar banner
 document.getElementById("deleteBannerBtn").addEventListener("click", async () => {
-    const { error } = await supabaseClient
-        .from("anuncios")
-        .delete()
-        .not("id", "is", null);
-
-    if (error) {
-        console.error(error);
-        alert("Error eliminando banner");
-        return;
-    }
-
+    await supabaseClient.from("anuncios").delete().not("id", "is", null);
     document.getElementById("announcementBanner").classList.add("hidden");
-    document.getElementById("bannerText").textContent = "";
-
-    alert("Banner eliminado");
 });
 
 
