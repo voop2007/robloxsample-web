@@ -9,6 +9,8 @@ const supabaseClient = createClient(
 );
 
 let gamesData = [];
+let noticiasData = [];
+
 let countdownInterval = null;
 let bannerTimeout = null;
 
@@ -62,7 +64,10 @@ function showSection(sectionId) {
     document.querySelectorAll("main section").forEach(sec => sec.classList.add("hidden"));
 
     const target = document.getElementById(sectionId);
-    if (target) target.classList.remove("hidden");
+    if (target) {
+        target.classList.remove("hidden");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
     // cerrar menú móvil si existe
     const mobileMenu = document.getElementById("mobileMenu");
@@ -110,7 +115,7 @@ function iniciarCuentaRegresiva() {
                     <h3 class="text-xl font-bold cyber-accent mb-4">🎮 Ingresa tu usuario de Roblox</h3>
 
                     <input id="robloxUserInput" type="text" placeholder="Ej: Player123"
-                        class="w-full px-4 py-3 rounded-xl text-white bg-black/50 border border-cyan-electric/30 focus:outline-none focus:border-cyan-electric mb-4">
+                        class="w-full px-4 py-3 rounded-xl text-white bg-black/50 border border-cyan-400/30 focus:outline-none focus:border-cyan-400 mb-4">
 
                     <button id="guardarUsuarioBtn" class="btn-cyber px-8 py-3 rounded-xl font-bold text-white">
                         <i class="fas fa-save mr-2"></i> Guardar
@@ -168,23 +173,35 @@ async function fetchJuegos() {
         }
 
         renderGames(gamesData);
+        renderAdminList();
 
     } catch (err) {
         console.error("Error:", err);
         gamesData = [];
         renderGames(gamesData);
+        renderAdminList();
     }
 }
 
 
 // ===============================
-// RENDER JUEGOS
+// RENDER JUEGOS PUBLICO
 // ===============================
 function renderGames(lista) {
     const container = document.getElementById("gamesContainer");
     if (!container) return;
 
     container.innerHTML = "";
+
+    if (!lista || lista.length === 0) {
+        container.innerHTML = `
+            <div class="neo-card p-8 text-center col-span-full">
+                <h3 class="text-2xl font-bold cyber-accent mb-3">No hay juegos aún</h3>
+                <p class="text-gray-400">Entra al panel admin (F8) para cargar juegos.</p>
+            </div>
+        `;
+        return;
+    }
 
     lista.forEach(game => {
         const codesArray = game.codigo ? game.codigo.split(",") : [];
@@ -272,6 +289,7 @@ function configurarAdminPanel() {
                 if (adminLogin) adminLogin.classList.add("hidden");
                 if (adminContent) adminContent.classList.remove("hidden");
                 renderAdminList();
+                renderNoticiasAdmin();
             } else {
                 alert("Usuario o contraseña incorrectos");
             }
@@ -281,7 +299,7 @@ function configurarAdminPanel() {
 
 
 // ===============================
-// ADMIN LIST
+// ADMIN LIST (JUEGOS)
 // ===============================
 function renderAdminList() {
     const adminGamesList = document.getElementById("adminGamesList");
@@ -289,7 +307,17 @@ function renderAdminList() {
 
     adminGamesList.innerHTML = "";
 
-    gamesData.forEach((game, index) => {
+    if (!gamesData || gamesData.length === 0) {
+        adminGamesList.innerHTML = `
+            <div class="neo-card p-6 text-center">
+                <h3 class="text-xl font-bold cyber-accent mb-3">No hay juegos</h3>
+                <p class="text-gray-400">Agrega juegos desde arriba.</p>
+            </div>
+        `;
+        return;
+    }
+
+    gamesData.forEach((game) => {
         const div = document.createElement("div");
         div.className = "neo-card p-6";
 
@@ -302,7 +330,7 @@ function renderAdminList() {
                 <input type="text" value="${game.codigo}" class="adminCodigo px-4 py-2 rounded-xl text-white bg-black/50 border border-cyan-400/30">
 
                 <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl font-bold text-white"
-                    onclick="deleteGame(${index})">
+                    onclick="deleteGame(${game.id})">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -314,10 +342,11 @@ function renderAdminList() {
 
 
 // ===============================
-// DELETE GAME SUPABASE
+// DELETE GAME SUPABASE (FIXED)
 // ===============================
-async function deleteGame(index) {
-    const gameId = gamesData[index].id;
+async function deleteGame(gameId) {
+    const confirmar = confirm("¿Seguro que quieres eliminar este juego?");
+    if (!confirmar) return;
 
     const { error } = await supabaseClient
         .from("juegos")
@@ -325,11 +354,12 @@ async function deleteGame(index) {
         .eq("id", gameId);
 
     if (error) {
-        alert("Error borrando juego");
+        alert("Error borrando juego (revisa policies)");
         console.error(error);
         return;
     }
 
+    alert("Juego eliminado");
     fetchJuegos();
 }
 
@@ -480,6 +510,9 @@ async function activarBanner() {
 // BORRAR BANNER
 // ===============================
 async function borrarBanner() {
+    const confirmar = confirm("¿Seguro que quieres borrar el banner?");
+    if (!confirmar) return;
+
     const { error } = await supabaseClient
         .from("anuncios")
         .delete()
@@ -499,18 +532,182 @@ async function borrarBanner() {
 
 
 // ===============================
+// NOTICIAS SUPABASE
+// ===============================
+async function fetchNoticias() {
+    try {
+        const { data, error } = await supabaseClient
+            .from("noticias")
+            .select("*")
+            .order("id", { ascending: false });
+
+        if (error) {
+            console.error("Error cargando noticias:", error);
+            noticiasData = [];
+        } else {
+            noticiasData = data || [];
+        }
+
+        renderNoticiasPublicas();
+        renderNoticiasAdmin();
+
+    } catch (err) {
+        console.error("Error noticias:", err);
+        noticiasData = [];
+        renderNoticiasPublicas();
+        renderNoticiasAdmin();
+    }
+}
+
+
+// ===============================
+// RENDER NOTICIAS PUBLICO
+// ===============================
+function renderNoticiasPublicas() {
+    const container = document.getElementById("noticiasContainer");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (!noticiasData || noticiasData.length === 0) {
+        container.innerHTML = `
+            <div class="neo-card p-8 text-center col-span-full">
+                <h3 class="text-2xl font-bold cyber-accent mb-3">No hay noticias aún</h3>
+                <p class="text-gray-400">El admin puede agregar noticias desde F8.</p>
+            </div>
+        `;
+        return;
+    }
+
+    noticiasData.forEach(noticia => {
+        const div = document.createElement("div");
+        div.className = "neo-card p-6";
+
+        div.innerHTML = `
+            <img src="${noticia.imagen}" class="w-full h-44 object-cover rounded-lg mb-4" alt="${noticia.titulo}">
+            <h3 class="text-2xl font-bold titanium-title mb-2">${noticia.titulo}</h3>
+            <p class="text-gray-300 text-sm leading-relaxed">${noticia.contenido}</p>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+
+// ===============================
+// AGREGAR NOTICIA
+// ===============================
+async function agregarNoticia() {
+    const titulo = document.getElementById("newNoticiaTitulo").value;
+    const imagen = document.getElementById("newNoticiaImagen").value;
+    const contenido = document.getElementById("newNoticiaTexto").value;
+
+    if (!titulo || !contenido) {
+        alert("Completa título y contenido");
+        return;
+    }
+
+    const { error } = await supabaseClient
+        .from("noticias")
+        .insert([{
+            titulo: titulo,
+            imagen: imagen || "https://via.placeholder.com/600x400",
+            contenido: contenido
+        }]);
+
+    if (error) {
+        alert("Error agregando noticia");
+        console.error(error);
+        return;
+    }
+
+    document.getElementById("newNoticiaTitulo").value = "";
+    document.getElementById("newNoticiaImagen").value = "";
+    document.getElementById("newNoticiaTexto").value = "";
+
+    alert("Noticia agregada!");
+    fetchNoticias();
+}
+
+
+// ===============================
+// ELIMINAR NOTICIA
+// ===============================
+async function deleteNoticia(id) {
+    const confirmar = confirm("¿Eliminar esta noticia?");
+    if (!confirmar) return;
+
+    const { error } = await supabaseClient
+        .from("noticias")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        alert("Error eliminando noticia");
+        console.error(error);
+        return;
+    }
+
+    alert("Noticia eliminada!");
+    fetchNoticias();
+}
+
+
+// ===============================
+// RENDER NOTICIAS ADMIN
+// ===============================
+function renderNoticiasAdmin() {
+    const list = document.getElementById("adminNoticiasList");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    if (!noticiasData || noticiasData.length === 0) {
+        list.innerHTML = `
+            <div class="neo-card p-6 text-center">
+                <h3 class="text-xl font-bold cyber-accent mb-3">No hay noticias</h3>
+                <p class="text-gray-400">Agrega una noticia usando el formulario.</p>
+            </div>
+        `;
+        return;
+    }
+
+    noticiasData.forEach(noticia => {
+        const div = document.createElement("div");
+        div.className = "neo-card p-6";
+
+        div.innerHTML = `
+            <h3 class="text-xl font-bold cyber-accent mb-3">${noticia.titulo}</h3>
+            <p class="text-gray-400 text-sm mb-3">${noticia.contenido.substring(0, 120)}...</p>
+
+            <button class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-xl font-bold text-white"
+                onclick="deleteNoticia(${noticia.id})">
+                <i class="fas fa-trash mr-2"></i> Eliminar
+            </button>
+        `;
+
+        list.appendChild(div);
+    });
+}
+
+
+// ===============================
 // HACER FUNCIONES GLOBALES PARA onclick
 // ===============================
 window.showSection = showSection;
 window.copyCode = copyCode;
 window.deleteGame = deleteGame;
 window.cargarEjemplosEnSupabase = cargarEjemplosEnSupabase;
+window.deleteNoticia = deleteNoticia;
 
 
 // ===============================
 // DOM LOADED
 // ===============================
 document.addEventListener("DOMContentLoaded", () => {
+
+    // Iniciar en inicio
+    showSection("inicio");
 
     // Participar
     const participarBtn = document.getElementById("participarBtn");
@@ -537,7 +734,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Admin
     configurarAdminPanel();
 
-    // Botones admin
+    // Botones admin juegos
     const quickAddBtn = document.getElementById("quickAddGameBtn");
     if (quickAddBtn) {
         quickAddBtn.addEventListener("click", quickAddGame);
@@ -548,6 +745,7 @@ document.addEventListener("DOMContentLoaded", () => {
         saveBtn.addEventListener("click", saveChanges);
     }
 
+    // Banner
     const startBannerBtn = document.getElementById("startBannerBtn");
     if (startBannerBtn) {
         startBannerBtn.addEventListener("click", activarBanner);
@@ -558,8 +756,14 @@ document.addEventListener("DOMContentLoaded", () => {
         deleteBannerBtn.addEventListener("click", borrarBanner);
     }
 
+    // Noticias admin
+    const addNoticiaBtn = document.getElementById("addNoticiaBtn");
+    if (addNoticiaBtn) {
+        addNoticiaBtn.addEventListener("click", agregarNoticia);
+    }
+
     // Cargar datos
     fetchJuegos();
     fetchBanner();
-
+    fetchNoticias();
 });
