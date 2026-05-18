@@ -14,7 +14,7 @@ let bannerTimeout = null;
 
 
 // ===============================
-// JUEGOS EJEMPLO (CARGAR A SUPABASE)
+// JUEGOS EJEMPLO
 // ===============================
 const juegosEjemplo = [
     {
@@ -56,26 +56,31 @@ const juegosEjemplo = [
 
 
 // ===============================
-// SECCIONES
+// SECCIONES (PESTAÑAS)
 // ===============================
 function showSection(sectionId) {
     document.querySelectorAll("main section").forEach(sec => sec.classList.add("hidden"));
 
     const target = document.getElementById(sectionId);
     if (target) target.classList.remove("hidden");
+
+    // cerrar menú móvil si existe
+    const mobileMenu = document.getElementById("mobileMenu");
+    if (mobileMenu) mobileMenu.classList.add("hidden");
 }
 
 
 // ===============================
-// CONTADOR PARTICIPAR
+// SISTEMA PARTICIPAR (CONTADOR + USUARIO)
 // ===============================
 function iniciarCuentaRegresiva() {
     const participarBtn = document.getElementById("participarBtn");
     const countdown = document.getElementById("countdown");
     const progressBar = document.getElementById("progressBar");
     const progressFill = document.getElementById("progressFill");
+    const sorteoContainer = document.getElementById("sorteoContainer");
 
-    if (!participarBtn || !countdown || !progressBar || !progressFill) return;
+    if (!participarBtn || !countdown || !progressBar || !progressFill || !sorteoContainer) return;
 
     let tiempo = 45;
 
@@ -99,7 +104,47 @@ function iniciarCuentaRegresiva() {
 
             countdown.classList.add("hidden");
             progressBar.classList.add("hidden");
-            participarBtn.classList.remove("hidden");
+
+            sorteoContainer.innerHTML = `
+                <div class="neo-card p-6 text-center">
+                    <h3 class="text-xl font-bold cyber-accent mb-4">🎮 Ingresa tu usuario de Roblox</h3>
+
+                    <input id="robloxUserInput" type="text" placeholder="Ej: Player123"
+                        class="w-full px-4 py-3 rounded-xl text-white bg-black/50 border border-cyan-electric/30 focus:outline-none focus:border-cyan-electric mb-4">
+
+                    <button id="guardarUsuarioBtn" class="btn-cyber px-8 py-3 rounded-xl font-bold text-white">
+                        <i class="fas fa-save mr-2"></i> Guardar
+                    </button>
+                </div>
+            `;
+
+            const guardarBtn = document.getElementById("guardarUsuarioBtn");
+            if (guardarBtn) {
+                guardarBtn.addEventListener("click", () => {
+                    const user = document.getElementById("robloxUserInput").value.trim();
+
+                    if (!user) {
+                        alert("Escribe tu usuario de Roblox");
+                        return;
+                    }
+
+                    alert("Usuario guardado para participar: " + user);
+
+                    sorteoContainer.innerHTML = `
+                        <div id="countdown" class="countdown-cyber mb-6 hidden">45</div>
+
+                        <div class="progress-cyber hidden" id="progressBar">
+                            <div class="progress-cyber-fill" id="progressFill"></div>
+                        </div>
+
+                        <button id="participarBtn" class="btn-cyber px-10 py-4 rounded-xl text-lg font-bold text-white">
+                            <i class="fas fa-gift mr-2"></i> Participar Ahora
+                        </button>
+                    `;
+
+                    document.getElementById("participarBtn").addEventListener("click", iniciarCuentaRegresiva);
+                });
+            }
         }
     }, 1000);
 }
@@ -156,7 +201,7 @@ function renderGames(lista) {
                 ${codesArray.map(code => `
                     <div class="flex items-center justify-between gap-2">
                         <span class="code-cyber-badge">${code.trim()}</span>
-                        <button class="copy-btn" onclick="copyCode('${code.trim()}')">
+                        <button class="btn-cyber px-3 py-2 rounded-lg text-sm" onclick="copyCode('${code.trim()}')">
                             <i class="fas fa-copy"></i>
                         </button>
                     </div>
@@ -352,7 +397,7 @@ async function saveChanges() {
 
 
 // ===============================
-// FUNCIÓN NUEVA: CARGAR EJEMPLOS A SUPABASE
+// CARGAR EJEMPLOS A SUPABASE
 // ===============================
 async function cargarEjemplosEnSupabase() {
     const confirmar = confirm("¿Quieres cargar juegos ejemplo en Supabase?");
@@ -384,7 +429,6 @@ async function fetchBanner() {
 
     if (data && data.length > 0) {
         const { mensaje, expira } = data[0];
-
         const tiempoRestante = expira - Date.now();
 
         if (tiempoRestante > 0) {
@@ -403,7 +447,9 @@ async function fetchBanner() {
 }
 
 
-// activar banner
+// ===============================
+// ACTIVAR BANNER
+// ===============================
 async function activarBanner() {
     const msg = document.getElementById("bannerMessage").value;
     const minutes = parseInt(document.getElementById("bannerMinutes").value);
@@ -430,7 +476,9 @@ async function activarBanner() {
 }
 
 
-// borrar banner
+// ===============================
+// BORRAR BANNER
+// ===============================
 async function borrarBanner() {
     const { error } = await supabaseClient
         .from("anuncios")
@@ -451,7 +499,7 @@ async function borrarBanner() {
 
 
 // ===============================
-// HACER FUNCIONES GLOBALES PARA HTML onclick
+// HACER FUNCIONES GLOBALES PARA onclick
 // ===============================
 window.showSection = showSection;
 window.copyCode = copyCode;
@@ -460,7 +508,7 @@ window.cargarEjemplosEnSupabase = cargarEjemplosEnSupabase;
 
 
 // ===============================
-// DOM LOADED (para evitar errores)
+// DOM LOADED
 // ===============================
 document.addEventListener("DOMContentLoaded", () => {
 
