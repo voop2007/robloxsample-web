@@ -1,19 +1,21 @@
-// ==========================
-// CONFIG SUPABASE
-// ==========================
+// ===============================
+// SUPABASE CONFIG
+// ===============================
+const { createClient } = supabase;
 
-const SUPABASE_URL = "https://iiuhpmstxosfjnaelfrf.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpdWhwbXN0eG9zZmpuYWVsZnJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTAzODcsImV4cCI6MjA5NDE4NjM4N30.szkMcsCY4cAiD_pm88cuZGgxbRAdYGykbLaSBedYwk0";
-
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = createClient(
+    "https://iiuhpmstxosfjnaelfrf.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpdWhwbXN0eG9zZmpuYWVsZnJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTAzODcsImV4cCI6MjA5NDE4NjM4N30.szkMcsCY4cAiD_pm88cuZGgxbRAdYGykbLaSBedYwk0"
+);
 
 let gamesData = [];
-let bannerTimeout;
+let countdownInterval = null;
+let bannerTimeout = null;
 
-// ==========================
-// JUEGOS EJEMPLO
-// ==========================
 
+// ===============================
+// JUEGOS EJEMPLO (CARGAR A SUPABASE)
+// ===============================
 const juegosEjemplo = [
     {
         nombre: "Blox Fruits",
@@ -28,139 +30,488 @@ const juegosEjemplo = [
         imagen_url: "https://tr.rbxcdn.com/180DAY-0d20b3c8edb946b2f4b27b6c2c78e8c7/512/512/Image/Png/noFilter",
         descripcion: "Juego de roleplay con casas, autos y ciudades",
         jugadores: 1200000
+    },
+    {
+        nombre: "Pet Simulator 99",
+        codigo: "FREEPET,DIAMONDS99,LUCKY",
+        imagen_url: "https://tr.rbxcdn.com/180DAY-b6d1d1d1dfedca56a76a4d3c49d0b2c9/512/512/Image/Png/noFilter",
+        descripcion: "Colecciona mascotas y gana recompensas",
+        jugadores: 900000
+    },
+    {
+        nombre: "Adopt Me",
+        codigo: "ADOPTME,FREEPET2025,REWARD",
+        imagen_url: "https://tr.rbxcdn.com/180DAY-0d8d2e84f75a9ed3cb04b03a6edb1b73/512/512/Image/Png/noFilter",
+        descripcion: "Adopta mascotas y vive en una ciudad",
+        jugadores: 800000
+    },
+    {
+        nombre: "Tower of Hell",
+        codigo: "TOH2025,FREEXP,LEVELUP",
+        imagen_url: "https://tr.rbxcdn.com/180DAY-8f8cfb03d9f2a0cf1d2c4c12b3f5d2b4/512/512/Image/Png/noFilter",
+        descripcion: "Supera torres imposibles y mejora tu habilidad",
+        jugadores: 600000
     }
 ];
 
-// ==========================
-// CARGAR JUEGOS DESDE SUPABASE
-// ==========================
 
+// ===============================
+// SECCIONES
+// ===============================
+function showSection(sectionId) {
+    document.querySelectorAll("main section").forEach(sec => sec.classList.add("hidden"));
+
+    const target = document.getElementById(sectionId);
+    if (target) target.classList.remove("hidden");
+}
+
+
+// ===============================
+// CONTADOR PARTICIPAR
+// ===============================
+function iniciarCuentaRegresiva() {
+    const participarBtn = document.getElementById("participarBtn");
+    const countdown = document.getElementById("countdown");
+    const progressBar = document.getElementById("progressBar");
+    const progressFill = document.getElementById("progressFill");
+
+    if (!participarBtn || !countdown || !progressBar || !progressFill) return;
+
+    let tiempo = 45;
+
+    participarBtn.classList.add("hidden");
+    countdown.classList.remove("hidden");
+    progressBar.classList.remove("hidden");
+
+    countdown.textContent = tiempo;
+    progressFill.style.width = "100%";
+
+    if (countdownInterval) clearInterval(countdownInterval);
+
+    countdownInterval = setInterval(() => {
+        tiempo--;
+
+        countdown.textContent = tiempo;
+        progressFill.style.width = ((tiempo / 45) * 100) + "%";
+
+        if (tiempo <= 0) {
+            clearInterval(countdownInterval);
+
+            countdown.classList.add("hidden");
+            progressBar.classList.add("hidden");
+            participarBtn.classList.remove("hidden");
+        }
+    }, 1000);
+}
+
+
+// ===============================
+// CARGAR JUEGOS DESDE SUPABASE
+// ===============================
 async function fetchJuegos() {
     try {
         const { data, error } = await supabaseClient
             .from("juegos")
-            .select("*");
+            .select("*")
+            .order("id", { ascending: true });
 
-        if (error || !data || data.length === 0) {
-            gamesData = juegosEjemplo;
+        if (error) {
+            console.error("Error cargando juegos:", error);
+            gamesData = [];
         } else {
-            gamesData = data;
+            gamesData = data || [];
         }
 
         renderGames(gamesData);
 
     } catch (err) {
-        gamesData = juegosEjemplo;
+        console.error("Error:", err);
+        gamesData = [];
         renderGames(gamesData);
     }
 }
 
-// ==========================
-// RENDER JUEGOS
-// ==========================
 
-function renderGames(games) {
+// ===============================
+// RENDER JUEGOS
+// ===============================
+function renderGames(lista) {
     const container = document.getElementById("gamesContainer");
     if (!container) return;
 
     container.innerHTML = "";
 
-    games.forEach(game => {
-        container.innerHTML += `
-            <div class="game-card">
-                <img src="${game.imagen_url}" class="game-img">
-                <h3>${game.nombre}</h3>
-                <p>${game.descripcion}</p>
-                <button onclick="copyCode('${game.codigo}')">Copiar Código</button>
+    lista.forEach(game => {
+        const codesArray = game.codigo ? game.codigo.split(",") : [];
+
+        const card = document.createElement("div");
+        card.className = "neo-card p-6";
+
+        card.innerHTML = `
+            <img src="${game.imagen_url}" class="w-full h-40 object-cover rounded-lg mb-4" alt="${game.nombre}">
+            <h3 class="text-xl font-bold titanium-title mb-2">${game.nombre}</h3>
+            <p class="text-gray-400 text-sm mb-3">${game.descripcion || ""}</p>
+
+            <div class="space-y-2">
+                ${codesArray.map(code => `
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="code-cyber-badge">${code.trim()}</span>
+                        <button class="copy-btn" onclick="copyCode('${code.trim()}')">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                `).join("")}
             </div>
         `;
+
+        container.appendChild(card);
     });
 }
 
-// ==========================
+
+// ===============================
 // COPIAR CÓDIGO
-// ==========================
-
-function copyCode(code) {
-    navigator.clipboard.writeText(code);
-    alert("Código copiado!");
+// ===============================
+function copyCode(texto) {
+    navigator.clipboard.writeText(texto);
+    alert("Código copiado: " + texto);
 }
 
-// ==========================
-// CAMBIAR SECCIONES
-// ==========================
 
-function showSection(sectionId) {
-    const sections = document.querySelectorAll(".section");
-    sections.forEach(sec => sec.style.display = "none");
-
-    const active = document.getElementById(sectionId);
-    if (active) active.style.display = "block";
-}
-
-// ==========================
-// PARTICIPAR
-// ==========================
-
-function iniciarCuentaRegresiva() {
-    alert("Participación registrada!");
-}
-
-// ==========================
-// BUSCADOR
-// ==========================
-
+// ===============================
+// BUSCADOR (PC Y MOVIL)
+// ===============================
 function aplicarBusqueda(valor) {
     const filtrados = gamesData.filter(game =>
         game.nombre.toLowerCase().includes(valor.toLowerCase())
     );
+
     renderGames(filtrados);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+
+// ===============================
+// PANEL ADMIN (F8)
+// ===============================
+function configurarAdminPanel() {
+    const adminBtn = document.getElementById("adminBtn");
+    const adminPanel = document.getElementById("adminPanel");
+    const closeAdmin = document.getElementById("closeAdmin");
+
+    const adminLogin = document.getElementById("adminLogin");
+    const adminContent = document.getElementById("adminContent");
+
+    const loginBtn = document.getElementById("loginBtn");
+
+    if (adminBtn) adminBtn.style.display = "none";
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "F8") {
+            e.preventDefault();
+            if (adminPanel) adminPanel.classList.remove("hidden");
+        }
+    });
+
+    if (closeAdmin) {
+        closeAdmin.addEventListener("click", () => {
+            if (adminPanel) adminPanel.classList.add("hidden");
+        });
+    }
+
+    if (loginBtn) {
+        loginBtn.addEventListener("click", () => {
+            const user = document.getElementById("adminUser").value;
+            const pass = document.getElementById("adminPass").value;
+
+            if (user === "admin" && pass === "1234") {
+                if (adminLogin) adminLogin.classList.add("hidden");
+                if (adminContent) adminContent.classList.remove("hidden");
+                renderAdminList();
+            } else {
+                alert("Usuario o contraseña incorrectos");
+            }
+        });
+    }
+}
+
+
+// ===============================
+// ADMIN LIST
+// ===============================
+function renderAdminList() {
+    const adminGamesList = document.getElementById("adminGamesList");
+    if (!adminGamesList) return;
+
+    adminGamesList.innerHTML = "";
+
+    gamesData.forEach((game, index) => {
+        const div = document.createElement("div");
+        div.className = "neo-card p-6";
+
+        div.innerHTML = `
+            <h3 class="text-lg font-bold mb-4 cyber-accent">Juego #${game.id}</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <input type="text" value="${game.nombre}" class="adminNombre px-4 py-2 rounded-xl text-white bg-black/50 border border-cyan-400/30">
+                <input type="text" value="${game.imagen_url}" class="adminImagen px-4 py-2 rounded-xl text-white bg-black/50 border border-cyan-400/30">
+                <input type="text" value="${game.codigo}" class="adminCodigo px-4 py-2 rounded-xl text-white bg-black/50 border border-cyan-400/30">
+
+                <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl font-bold text-white"
+                    onclick="deleteGame(${index})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+
+        adminGamesList.appendChild(div);
+    });
+}
+
+
+// ===============================
+// DELETE GAME SUPABASE
+// ===============================
+async function deleteGame(index) {
+    const gameId = gamesData[index].id;
+
+    const { error } = await supabaseClient
+        .from("juegos")
+        .delete()
+        .eq("id", gameId);
+
+    if (error) {
+        alert("Error borrando juego");
+        console.error(error);
+        return;
+    }
 
     fetchJuegos();
+}
 
+
+// ===============================
+// ADD GAME SUPABASE
+// ===============================
+async function quickAddGame() {
+    const nombre = document.getElementById("newGameName").value;
+    const imagen = document.getElementById("newGameImage").value;
+    const codigos = document.getElementById("newGameCodes").value;
+
+    if (!nombre || !codigos) {
+        alert("Completa nombre y códigos");
+        return;
+    }
+
+    const { error } = await supabaseClient.from("juegos").insert([{
+        nombre: nombre,
+        imagen_url: imagen || "https://via.placeholder.com/300",
+        codigo: codigos,
+        descripcion: "Agregado desde admin",
+        jugadores: 0
+    }]);
+
+    if (error) {
+        alert("Error agregando juego");
+        console.error(error);
+        return;
+    }
+
+    document.getElementById("newGameName").value = "";
+    document.getElementById("newGameImage").value = "";
+    document.getElementById("newGameCodes").value = "";
+
+    fetchJuegos();
+}
+
+
+// ===============================
+// SAVE EDITS SUPABASE
+// ===============================
+async function saveChanges() {
+    const nombres = document.querySelectorAll(".adminNombre");
+    const imagenes = document.querySelectorAll(".adminImagen");
+    const codigos = document.querySelectorAll(".adminCodigo");
+
+    for (let i = 0; i < gamesData.length; i++) {
+        gamesData[i].nombre = nombres[i].value;
+        gamesData[i].imagen_url = imagenes[i].value;
+        gamesData[i].codigo = codigos[i].value;
+
+        await supabaseClient.from("juegos")
+            .update({
+                nombre: gamesData[i].nombre,
+                imagen_url: gamesData[i].imagen_url,
+                codigo: gamesData[i].codigo
+            })
+            .eq("id", gamesData[i].id);
+    }
+
+    alert("Cambios guardados!");
+    fetchJuegos();
+}
+
+
+// ===============================
+// FUNCIÓN NUEVA: CARGAR EJEMPLOS A SUPABASE
+// ===============================
+async function cargarEjemplosEnSupabase() {
+    const confirmar = confirm("¿Quieres cargar juegos ejemplo en Supabase?");
+    if (!confirmar) return;
+
+    for (let juego of juegosEjemplo) {
+        await supabaseClient.from("juegos").insert([juego]);
+    }
+
+    alert("Juegos ejemplo cargados!");
+    fetchJuegos();
+}
+
+
+// ===============================
+// BANNER SUPABASE
+// ===============================
+async function fetchBanner() {
+    const { data, error } = await supabaseClient
+        .from("anuncios")
+        .select("*")
+        .order("id", { ascending: false })
+        .limit(1);
+
+    if (error) {
+        console.error("Error cargando banner:", error);
+        return;
+    }
+
+    if (data && data.length > 0) {
+        const { mensaje, expira } = data[0];
+
+        const tiempoRestante = expira - Date.now();
+
+        if (tiempoRestante > 0) {
+            document.getElementById("bannerText").textContent = mensaje;
+            document.getElementById("announcementBanner").classList.remove("hidden");
+
+            if (bannerTimeout) clearTimeout(bannerTimeout);
+
+            bannerTimeout = setTimeout(() => {
+                document.getElementById("announcementBanner").classList.add("hidden");
+            }, tiempoRestante);
+        } else {
+            document.getElementById("announcementBanner").classList.add("hidden");
+        }
+    }
+}
+
+
+// activar banner
+async function activarBanner() {
+    const msg = document.getElementById("bannerMessage").value;
+    const minutes = parseInt(document.getElementById("bannerMinutes").value);
+
+    if (!msg || !minutes) {
+        alert("Completa mensaje y minutos");
+        return;
+    }
+
+    const expira = Date.now() + (minutes * 60000);
+
+    const { error } = await supabaseClient
+        .from("anuncios")
+        .insert([{ mensaje: msg, expira: expira }]);
+
+    if (error) {
+        console.error(error);
+        alert("Error guardando banner");
+        return;
+    }
+
+    alert("Banner activado!");
+    fetchBanner();
+}
+
+
+// borrar banner
+async function borrarBanner() {
+    const { error } = await supabaseClient
+        .from("anuncios")
+        .delete()
+        .not("id", "is", null);
+
+    if (error) {
+        console.error(error);
+        alert("Error eliminando banner");
+        return;
+    }
+
+    document.getElementById("announcementBanner").classList.add("hidden");
+    document.getElementById("bannerText").textContent = "";
+
+    alert("Banner eliminado");
+}
+
+
+// ===============================
+// HACER FUNCIONES GLOBALES PARA HTML onclick
+// ===============================
+window.showSection = showSection;
+window.copyCode = copyCode;
+window.deleteGame = deleteGame;
+window.cargarEjemplosEnSupabase = cargarEjemplosEnSupabase;
+
+
+// ===============================
+// DOM LOADED (para evitar errores)
+// ===============================
+document.addEventListener("DOMContentLoaded", () => {
+
+    // Participar
+    const participarBtn = document.getElementById("participarBtn");
+    if (participarBtn) {
+        participarBtn.addEventListener("click", iniciarCuentaRegresiva);
+    }
+
+    // Buscador PC
     const searchInput = document.getElementById("searchInput");
-    const searchInputMobile = document.getElementById("searchInputMobile");
-
     if (searchInput) {
         searchInput.addEventListener("input", () => {
             aplicarBusqueda(searchInput.value);
         });
     }
 
+    // Buscador móvil
+    const searchInputMobile = document.getElementById("searchInputMobile");
     if (searchInputMobile) {
         searchInputMobile.addEventListener("input", () => {
             aplicarBusqueda(searchInputMobile.value);
         });
     }
 
-    const participarBtn = document.getElementById("participarBtn");
-    if (participarBtn) {
-        participarBtn.addEventListener("click", iniciarCuentaRegresiva);
+    // Admin
+    configurarAdminPanel();
+
+    // Botones admin
+    const quickAddBtn = document.getElementById("quickAddGameBtn");
+    if (quickAddBtn) {
+        quickAddBtn.addEventListener("click", quickAddGame);
     }
-});
 
-// ==========================
-// PANEL ADMIN CON F8
-// ==========================
-
-document.addEventListener("keydown", function (e) {
-    if (e.key === "F8") {
-        const password = prompt("Contraseña administrador:");
-        if (password === "admin123") {
-            const panel = document.getElementById("adminPanel");
-            if (panel) panel.style.display = "block";
-        } else {
-            alert("Contraseña incorrecta");
-        }
+    const saveBtn = document.getElementById("saveChangesBtn");
+    if (saveBtn) {
+        saveBtn.addEventListener("click", saveChanges);
     }
+
+    const startBannerBtn = document.getElementById("startBannerBtn");
+    if (startBannerBtn) {
+        startBannerBtn.addEventListener("click", activarBanner);
+    }
+
+    const deleteBannerBtn = document.getElementById("deleteBannerBtn");
+    if (deleteBannerBtn) {
+        deleteBannerBtn.addEventListener("click", borrarBanner);
+    }
+
+    // Cargar datos
+    fetchJuegos();
+    fetchBanner();
+
 });
-
-// ==========================
-// FUNCIONES GLOBALES
-// ==========================
-
-window.showSection = showSection;
-window.copyCode = copyCode;
