@@ -1,300 +1,549 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+// ===============================
+// SUPABASE CONFIG
+// ===============================
+const { createClient } = supabase;
 
-:root {
-    --bg-primary: #111111;
-    --bg-secondary: #1a1a1a;
-    --bg-glass: rgba(0, 0, 0, 0.9);
+const supabaseClient = createClient(
+  "https://iiuhpmstxosfjnaelfrf.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpdWhwbXN0eG9zZmpuYWVsZnJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MTAzODcsImV4cCI6MjA5NDE4NjM4N30.szkMcsCY4cAiD_pm88cuZGgxbRAdYGykbLaSBedYwk0"
+);
 
-    --border-cyan: #22d3ee;
-    --magenta-cyber: #ec4899;
-    --cyan-electric: #22d3ee;
+let gamesData = [];
+let countdownInterval = null;
+let bannerTimeout = null;
 
-    --titanium-white: #f8fafc;
-    --text-secondary: #94a3b8;
+// ===============================
+// SECCIONES (PESTAÑAS)
+// ===============================
+function showSection(sectionId) {
+  document.querySelectorAll("main section").forEach(sec => sec.classList.add("hidden"));
 
-    --glow-cyan: rgba(34, 211, 238, 0.4);
-    --glow-magenta: rgba(236, 72, 153, 0.4);
+  const target = document.getElementById(sectionId);
+  if (target) target.classList.remove("hidden");
+
+  const mobileMenu = document.getElementById("mobileMenu");
+  if (mobileMenu) mobileMenu.classList.add("hidden");
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: #050505;
-    background-image: url('fondo.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
-    color: var(--titanium-white);
-    line-height: 1.6;
-    margin: 0;
-    padding: 0;
-    position: relative;
-    overflow-x: hidden;
-}
+// ===============================
+// SISTEMA PARTICIPAR (CONTADOR + USUARIO)
+// ===============================
+function iniciarCuentaRegresiva() {
+  const participarBtn = document.getElementById("participarBtn");
+  const countdown = document.getElementById("countdown");
+  const progressBar = document.getElementById("progressBar");
+  const progressFill = document.getElementById("progressFill");
+  const userForm = document.getElementById("userForm");
 
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 1;
-    pointer-events: none;
-}
+  if (!participarBtn || !countdown || !progressBar || !progressFill) return;
 
-.section-padding {
-    padding: 4rem 0;
-    position: relative;
-    z-index: 2;
-}
+  let tiempo = 45;
 
-.container-wide {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1rem;
-    position: relative;
-    z-index: 2;
-}
+  participarBtn.classList.add("hidden");
+  countdown.classList.remove("hidden");
+  progressBar.classList.remove("hidden");
 
-.neo-glass {
-    background: rgba(0, 0, 0, 0.9);
-    border: 1px solid var(--border-cyan);
-    border-radius: 0.75rem;
-    position: relative;
-    z-index: 2;
-    box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
-}
+  countdown.textContent = tiempo;
+  progressFill.style.width = "100%";
 
-.neo-card {
-    background: rgba(0, 0, 0, 0.9);
-    border: 1px solid rgba(34, 211, 238, 0.3);
-    border-radius: 0.75rem;
-    transition: all 0.3s ease;
-    transform: translateY(0);
-    position: relative;
-    z-index: 2;
-}
+  if (userForm) userForm.classList.add("hidden");
 
-.neo-card:hover {
-    border-color: var(--border-cyan);
-    transform: translateY(-2px);
-    box-shadow: 0 0 30px rgba(34, 211, 238, 0.3);
-}
+  if (countdownInterval) clearInterval(countdownInterval);
 
-.titanium-title {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    color: var(--titanium-white);
-    text-shadow: 0 0 20px rgba(248, 250, 252, 0.5);
-}
+  countdownInterval = setInterval(() => {
+    tiempo--;
 
-.cyber-accent {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 600;
-    background: linear-gradient(135deg, var(--magenta-cyber), var(--cyan-electric));
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    -webkit-text-fill-color: transparent;
-}
+    countdown.textContent = tiempo;
+    progressFill.style.width = ((tiempo / 45) * 100) + "%";
 
-.nav-cyber {
-    color: var(--titanium-white);
-    text-decoration: none;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    position: relative;
-}
+    if (tiempo <= 0) {
+      clearInterval(countdownInterval);
 
-.nav-cyber:hover {
-    color: var(--cyan-electric);
-    text-shadow: 0 0 15px var(--glow-cyan);
-    transform: translateY(-1px);
-}
+      countdown.classList.add("hidden");
+      progressBar.classList.add("hidden");
 
-.btn-cyber {
-    background: linear-gradient(135deg, var(--magenta-cyber), var(--cyan-electric));
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.75rem;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    transform: scale(1);
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-cyber:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 25px rgba(34, 211, 238, 0.4);
-}
-
-.btn-cyber:active {
-    transform: scale(0.95);
-}
-
-/* =============================== */
-/* BOTON PARTICIPAR AHORA MEJORADO */
-/* =============================== */
-#participarBtn {
-    font-size: 1.3rem;
-    padding: 1.2rem 2.5rem;
-    border-radius: 1rem;
-    font-weight: 900;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    box-shadow: 0 0 20px rgba(34, 211, 238, 0.4);
-    animation: pulseCyber 1.6s infinite;
-}
-
-#participarBtn:hover {
-    transform: scale(1.08);
-    box-shadow: 0 0 35px rgba(236, 72, 153, 0.6),
-                0 0 35px rgba(34, 211, 238, 0.6);
-}
-
-@keyframes pulseCyber {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 15px rgba(34, 211, 238, 0.3);
+      if (userForm) {
+        userForm.classList.remove("hidden");
+      }
     }
-    50% {
-        transform: scale(1.05);
-        box-shadow: 0 0 30px rgba(236, 72, 153, 0.6),
-                    0 0 30px rgba(34, 211, 238, 0.6);
+  }, 1000);
+}
+
+// ===============================
+// GUARDAR USUARIO ROBLOX (SIN DB)
+// ===============================
+function guardarUsuarioRoblox() {
+  const input = document.getElementById("robloxUserInput");
+  const msg = document.getElementById("userSavedMsg");
+
+  if (!input) return;
+
+  const user = input.value.trim();
+
+  if (!user) {
+    alert("Escribe tu usuario de Roblox");
+    return;
+  }
+
+  if (msg) msg.classList.remove("hidden");
+
+  alert("Usuario guardado para participar: " + user);
+
+  input.value = "";
+}
+
+// ===============================
+// CARGAR JUEGOS DESDE SUPABASE
+// ===============================
+async function fetchJuegos() {
+  try {
+    const { data, error } = await supabaseClient
+      .from("juegos")
+      .select("*")
+      .order("id", { ascending: true });
+
+    if (error) {
+      console.error("Error cargando juegos:", error);
+      gamesData = [];
+    } else {
+      gamesData = data || [];
     }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 15px rgba(34, 211, 238, 0.3);
+
+    renderGames(gamesData);
+    renderAdminList();
+
+  } catch (err) {
+    console.error("Error:", err);
+    gamesData = [];
+    renderGames(gamesData);
+  }
+}
+
+// ===============================
+// RENDER JUEGOS
+// ===============================
+function renderGames(lista) {
+  const container = document.getElementById("gamesContainer");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (!lista || lista.length === 0) {
+    container.innerHTML = `
+      <div class="neo-card p-6 text-center col-span-full">
+        <h3 class="text-xl font-bold cyber-accent mb-2">No hay juegos todavía</h3>
+        <p class="text-gray-400">Agrega juegos desde el panel admin (F8).</p>
+      </div>
+    `;
+    return;
+  }
+
+  lista.forEach(game => {
+    const codesArray = game.codigo ? game.codigo.split(",") : [];
+
+    const card = document.createElement("div");
+    card.className = "neo-card p-6";
+
+    card.innerHTML = `
+      <img src="${game.imagen_url}" class="w-full h-40 object-cover rounded-lg mb-4" alt="${game.nombre}">
+      <h3 class="text-xl font-bold titanium-title mb-2">${game.nombre}</h3>
+      <p class="text-gray-400 text-sm mb-3">${game.descripcion || ""}</p>
+
+      <div class="space-y-2">
+        ${codesArray.map(code => `
+          <div class="flex items-center justify-between gap-2">
+            <span class="code-cyber-badge break-all">${code.trim()}</span>
+            <button class="btn-cyber px-3 py-2 rounded-lg text-sm" onclick="copyCode('${code.trim()}')">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+        `).join("")}
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+// ===============================
+// COPIAR CÓDIGO
+// ===============================
+function copyCode(texto) {
+  navigator.clipboard.writeText(texto);
+  alert("Código copiado: " + texto);
+}
+
+// ===============================
+// BUSCADOR
+// ===============================
+function aplicarBusqueda(valor) {
+  const filtrados = gamesData.filter(game =>
+    game.nombre.toLowerCase().includes(valor.toLowerCase())
+  );
+
+  renderGames(filtrados);
+}
+
+// ===============================
+// PANEL ADMIN (F8) - MÁS SEGURO CON AUTH
+// ===============================
+function configurarAdminPanel() {
+  const adminPanel = document.getElementById("adminPanel");
+  const closeAdmin = document.getElementById("closeAdmin");
+  const loginBtn = document.getElementById("loginBtn");
+
+  const adminLogin = document.getElementById("adminLogin");
+  const adminContent = document.getElementById("adminContent");
+
+  // Abrir panel con F8
+  document.addEventListener("keydown", async (e) => {
+    if (e.key === "F8") {
+      e.preventDefault();
+
+      if (!adminPanel) return;
+      adminPanel.classList.remove("hidden");
+
+      // Verificar sesión
+      const { data } = await supabaseClient.auth.getSession();
+
+      if (data.session) {
+        if (adminLogin) adminLogin.classList.add("hidden");
+        if (adminContent) adminContent.classList.remove("hidden");
+        renderAdminList();
+      } else {
+        if (adminLogin) adminLogin.classList.remove("hidden");
+        if (adminContent) adminContent.classList.add("hidden");
+      }
     }
+  });
+
+  // Cerrar panel
+  if (closeAdmin) {
+    closeAdmin.addEventListener("click", () => {
+      if (adminPanel) adminPanel.classList.add("hidden");
+    });
+  }
+
+  // Login Supabase Auth
+  if (loginBtn) {
+    loginBtn.addEventListener("click", async () => {
+      const email = document.getElementById("adminUser").value.trim();
+      const pass = document.getElementById("adminPass").value.trim();
+
+      if (!email || !pass) {
+        alert("Escribe correo y contraseña");
+        return;
+      }
+
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: pass
+      });
+
+      if (error) {
+        alert("Login incorrecto");
+        console.error(error);
+        return;
+      }
+
+      alert("Bienvenido Admin");
+
+      if (adminLogin) adminLogin.classList.add("hidden");
+      if (adminContent) adminContent.classList.remove("hidden");
+
+      renderAdminList();
+    });
+  }
 }
 
-.countdown-cyber {
-    font-family: 'Orbitron', monospace;
-    font-size: 6rem;
-    font-weight: 900;
-    color: var(--cyan-electric);
-    text-align: center;
-    letter-spacing: 0.05em;
-    line-height: 1;
+// ===============================
+// ADMIN LIST
+// ===============================
+function renderAdminList() {
+  const adminGamesList = document.getElementById("adminGamesList");
+  if (!adminGamesList) return;
+
+  adminGamesList.innerHTML = "";
+
+  if (!gamesData || gamesData.length === 0) {
+    adminGamesList.innerHTML = `
+      <div class="neo-card p-6 text-center">
+        <p class="text-gray-400">No hay juegos para editar.</p>
+      </div>
+    `;
+    return;
+  }
+
+  gamesData.forEach((game) => {
+    const div = document.createElement("div");
+    div.className = "neo-card p-6";
+
+    div.innerHTML = `
+      <h3 class="text-lg font-bold mb-4 cyber-accent">Juego #${game.id}</h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <input type="text" value="${game.nombre}" data-id="${game.id}" class="adminNombre px-4 py-2 rounded-xl text-white bg-black/50 border border-cyan-400/30">
+        <input type="text" value="${game.imagen_url}" data-id="${game.id}" class="adminImagen px-4 py-2 rounded-xl text-white bg-black/50 border border-cyan-400/30">
+        <input type="text" value="${game.codigo}" data-id="${game.id}" class="adminCodigo px-4 py-2 rounded-xl text-white bg-black/50 border border-cyan-400/30">
+
+        <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl font-bold text-white"
+          onclick="deleteGame(${game.id})">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    `;
+
+    adminGamesList.appendChild(div);
+  });
 }
 
-.progress-cyber {
-    width: 100%;
-    height: 12px;
-    background: rgba(0, 0, 0, 0.8);
-    border-radius: 6px;
-    overflow: hidden;
-    margin-top: 1.5rem;
-    border: 1px solid rgba(34, 211, 238, 0.2);
+// ===============================
+// DELETE GAME SUPABASE
+// ===============================
+async function deleteGame(gameId) {
+  const confirmar = confirm("¿Seguro que quieres eliminar este juego?");
+  if (!confirmar) return;
+
+  const { error } = await supabaseClient
+    .from("juegos")
+    .delete()
+    .eq("id", gameId);
+
+  if (error) {
+    alert("Error borrando juego (¿estás logueado?)");
+    console.error(error);
+    return;
+  }
+
+  alert("Juego eliminado!");
+  fetchJuegos();
 }
 
-.progress-cyber-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--magenta-cyber), var(--cyan-electric));
-    transition: width 1s linear;
-    transform-origin: left;
+// ===============================
+// ADD GAME SUPABASE
+// ===============================
+async function quickAddGame() {
+  const nombre = document.getElementById("newGameName").value.trim();
+  const imagen = document.getElementById("newGameImage").value.trim();
+  const codigos = document.getElementById("newGameCodes").value.trim();
+
+  if (!nombre || !codigos) {
+    alert("Completa nombre y códigos");
+    return;
+  }
+
+  const { error } = await supabaseClient.from("juegos").insert([{
+    nombre: nombre,
+    imagen_url: imagen || "https://via.placeholder.com/512",
+    codigo: codigos,
+    descripcion: "Agregado desde admin",
+    jugadores: 0
+  }]);
+
+  if (error) {
+    alert("Error agregando juego (¿estás logueado?)");
+    console.error(error);
+    return;
+  }
+
+  document.getElementById("newGameName").value = "";
+  document.getElementById("newGameImage").value = "";
+  document.getElementById("newGameCodes").value = "";
+
+  alert("Juego agregado!");
+  fetchJuegos();
 }
 
-input[type="text"],
-input[type="password"],
-input[type="number"],
-textarea,
-select {
-    background: rgba(0, 0, 0, 0.8) !important;
-    border: 1px solid rgba(34, 211, 238, 0.3) !important;
-    transition: all 0.3s ease !important;
-    color: white !important;
+// ===============================
+// SAVE EDITS SUPABASE
+// ===============================
+async function saveChanges() {
+  const nombres = document.querySelectorAll(".adminNombre");
+  const imagenes = document.querySelectorAll(".adminImagen");
+  const codigos = document.querySelectorAll(".adminCodigo");
+
+  for (let i = 0; i < nombres.length; i++) {
+    const id = nombres[i].dataset.id;
+
+    const nuevoNombre = nombres[i].value.trim();
+    const nuevaImagen = imagenes[i].value.trim();
+    const nuevosCodigos = codigos[i].value.trim();
+
+    const { error } = await supabaseClient.from("juegos")
+      .update({
+        nombre: nuevoNombre,
+        imagen_url: nuevaImagen,
+        codigo: nuevosCodigos
+      })
+      .eq("id", id);
+
+    if (error) {
+      alert("Error guardando cambios (¿estás logueado?)");
+      console.error(error);
+      return;
+    }
+  }
+
+  alert("Cambios guardados!");
+  fetchJuegos();
 }
 
-input[type="text"]:focus,
-input[type="password"]:focus,
-input[type="number"]:focus,
-textarea:focus,
-select:focus {
-    border-color: var(--cyan-electric) !important;
-    box-shadow: 0 0 15px rgba(34, 211, 238, 0.3) !important;
-    background: rgba(0, 0, 0, 0.9) !important;
-    outline: none !important;
+// ===============================
+// BANNER SUPABASE
+// ===============================
+async function fetchBanner() {
+  const { data, error } = await supabaseClient
+    .from("anuncios")
+    .select("*")
+    .order("id", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    console.error("Error cargando banner:", error);
+    return;
+  }
+
+  if (data && data.length > 0) {
+    const { mensaje, expira } = data[0];
+    const tiempoRestante = expira - Date.now();
+
+    if (tiempoRestante > 0) {
+      document.getElementById("bannerText").textContent = mensaje;
+      document.getElementById("announcementBanner").classList.remove("hidden");
+
+      if (bannerTimeout) clearTimeout(bannerTimeout);
+
+      bannerTimeout = setTimeout(() => {
+        document.getElementById("announcementBanner").classList.add("hidden");
+      }, tiempoRestante);
+    } else {
+      document.getElementById("announcementBanner").classList.add("hidden");
+    }
+  }
 }
 
-/* =============================== */
-/* CODIGOS (NO DESBORDARSE) */
-/* =============================== */
-.code-cyber-badge {
-    background: rgba(0, 0, 0, 0.8);
-    color: var(--cyan-electric);
-    padding: 0.6rem 0.8rem;
-    border-radius: 0.5rem;
-    font-family: 'Orbitron', monospace;
-    font-size: 0.85rem;
-    font-weight: 700;
-    display: block;
-    width: 100%;
-    margin: 0.25rem 0;
-    border: 1px solid rgba(34, 211, 238, 0.2);
+// ===============================
+// ACTIVAR BANNER
+// ===============================
+async function activarBanner() {
+  const msg = document.getElementById("bannerMessage").value.trim();
+  const minutes = parseInt(document.getElementById("bannerMinutes").value);
 
-    word-break: break-word;
-    overflow-wrap: break-word;
-    white-space: normal;
-    max-width: 100%;
-}
+  if (!msg || !minutes) {
+    alert("Completa mensaje y minutos");
+    return;
+  }
 
-.copy-btn {
-    background: rgba(34, 211, 238, 0.15);
-    border: 1px solid rgba(34, 211, 238, 0.4);
-    padding: 6px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 12px;
-    color: white;
-    transition: all 0.2s ease;
+  const expira = Date.now() + (minutes * 60000);
+
+  const { error } = await supabaseClient
+    .from("anuncios")
+    .insert([{ mensaje: msg, expira: expira }]);
+
+  if (error) {
+    console.error(error);
+    alert("Error guardando banner (¿estás logueado?)");
+    return;
+  }
+
+  alert("Banner activado!");
+  fetchBanner();
 }
 
-.copy-btn:hover {
-    background: rgba(34, 211, 238, 0.35);
-    box-shadow: 0 0 10px rgba(34, 211, 238, 0.3);
+// ===============================
+// BORRAR BANNER
+// ===============================
+async function borrarBanner() {
+  const confirmar = confirm("¿Seguro que quieres borrar el banner?");
+  if (!confirmar) return;
+
+  const { error } = await supabaseClient
+    .from("anuncios")
+    .delete()
+    .not("id", "is", null);
+
+  if (error) {
+    console.error(error);
+    alert("Error eliminando banner (¿estás logueado?)");
+    return;
+  }
+
+  document.getElementById("announcementBanner").classList.add("hidden");
+  document.getElementById("bannerText").textContent = "";
+
+  alert("Banner eliminado");
 }
 
-h1, h2, h3, h4, h5, h6 {
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
-}
+// ===============================
+// FUNCIONES GLOBALES
+// ===============================
+window.showSection = showSection;
+window.copyCode = copyCode;
+window.deleteGame = deleteGame;
 
-/* =============================== */
-/* BANNER ANUNCIO MOVIBLE */
-/* =============================== */
-#announcementBanner {
-    border-bottom: 2px solid rgba(34, 211, 238, 0.5);
-    overflow: hidden;
-    position: relative;
-}
+// ===============================
+// DOM LOADED
+// ===============================
+document.addEventListener("DOMContentLoaded", async () => {
 
-#bannerText {
-    display: inline-block;
-    white-space: nowrap;
-    padding-left: 100%;
-    animation: marquee 15s linear infinite;
-    font-size: 16px;
-    font-weight: 900;
-    color: #fef08a;
-    text-shadow: 0 0 15px rgba(254, 240, 138, 0.8),
-                 0 0 25px rgba(254, 240, 138, 0.4);
-}
+  showSection("inicio");
 
-@keyframes marquee {
-    0% { transform: translateX(0%); }
-    100% { transform: translateX(-100%); }
-}
-.code-cyber-badge {
-    word-break: break-word;
-    overflow-wrap: break-word;
-    white-space: normal;
-    max-width: 100%;
-    display: block;
-}
+  // Participar
+  const participarBtn = document.getElementById("participarBtn");
+  if (participarBtn) {
+    participarBtn.addEventListener("click", iniciarCuentaRegresiva);
+  }
+
+  // Guardar usuario
+  const saveUserBtn = document.getElementById("saveUserBtn");
+  if (saveUserBtn) {
+    saveUserBtn.addEventListener("click", guardarUsuarioRoblox);
+  }
+
+  // Buscador PC
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      aplicarBusqueda(searchInput.value);
+    });
+  }
+
+  // Buscador móvil
+  const searchInputMobile = document.getElementById("searchInputMobile");
+  if (searchInputMobile) {
+    searchInputMobile.addEventListener("input", () => {
+      aplicarBusqueda(searchInputMobile.value);
+    });
+  }
+
+  // Admin panel seguro
+  configurarAdminPanel();
+
+  // Botones admin
+  const quickAddBtn = document.getElementById("quickAddGameBtn");
+  if (quickAddBtn) {
+    quickAddBtn.addEventListener("click", quickAddGame);
+  }
+
+  const saveBtn = document.getElementById("saveChangesBtn");
+  if (saveBtn) {
+    saveBtn.addEventListener("click", saveChanges);
+  }
+
+  const startBannerBtn = document.getElementById("startBannerBtn");
+  if (startBannerBtn) {
+    startBannerBtn.addEventListener("click", activarBanner);
+  }
+
+  const deleteBannerBtn = document.getElementById("deleteBannerBtn");
+  if (deleteBannerBtn) {
+    deleteBannerBtn.addEventListener("click", borrarBanner);
+  }
+
+  // Cargar datos
+  fetchJuegos();
+  fetchBanner();
+
+});
