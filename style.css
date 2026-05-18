@@ -244,3 +244,113 @@ h1, h2, h3, h4, h5, h6 {
     0% { transform: translateX(0%); }
     100% { transform: translateX(-100%); }
 }
+/* ===============================
+   TITULOS PRINCIPALES MEJORADOS
+================================ */
+.section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 3.5rem;
+    text-align: center;
+    letter-spacing: 2px;
+    margin-bottom: 3rem;
+
+    background: linear-gradient(135deg, var(--magenta-cyber), var(--cyan-electric));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+
+    text-shadow: 0 0 25px rgba(34, 211, 238, 0.35),
+                 0 0 25px rgba(236, 72, 153, 0.25);
+}
+
+/* Para celular */
+@media (max-width: 768px) {
+    .section-title {
+        font-size: 2.3rem;
+        margin-bottom: 2rem;
+    }
+}
+
+
+/* ===============================
+   TITULO EXTRA BRUTAL (ROPA)
+================================ */
+.section-title-big {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 4.2rem;
+    text-align: center;
+    letter-spacing: 2px;
+    margin-bottom: 3rem;
+
+    background: linear-gradient(135deg, #f472b6, #22d3ee, #a855f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+
+    text-shadow: 0 0 30px rgba(34, 211, 238, 0.35),
+                 0 0 30px rgba(236, 72, 153, 0.25);
+}
+
+/* Para celular */
+@media (max-width: 768px) {
+    .section-title-big {
+        font-size: 2.6rem;
+        margin-bottom: 2rem;
+    }
+}
+
+
+/* ===============================
+   NOTICIAS MEJORADAS
+================================ */
+.news-card {
+    background: rgba(0, 0, 0, 0.88);
+    border: 1px solid rgba(34, 211, 238, 0.25);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.news-card:hover {
+    border-color: rgba(34, 211, 238, 0.6);
+    box-shadow: 0 0 25px rgba(34, 211, 238, 0.25);
+    transform: translateY(-4px);
+}
+
+.news-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-bottom: 1px solid rgba(34, 211, 238, 0.2);
+}
+
+.news-card-content {
+    padding: 1.5rem;
+}
+
+.news-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+
+    background: linear-gradient(135deg, var(--magenta-cyber), var(--cyan-electric));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.news-text {
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.news-date {
+    margin-top: 0.8rem;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-family: 'Orbitron', sans-serif;
+}
