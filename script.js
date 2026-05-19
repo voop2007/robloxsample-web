@@ -104,14 +104,87 @@ function copyCode(texto) {
 }
 
 // ===============================
-// BUSCADOR
+// BUSCADOR (ACTUALIZADO A GLOBAL)
 // ===============================
 function aplicarBusqueda(valor) {
-  const filtrados = gamesData.filter(game =>
-    (game.nombre || "").toLowerCase().includes(valor.toLowerCase())
+  const texto = valor.trim().toLowerCase();
+
+  // Si está vacío, vuelve a mostrar todo normal
+  if (!texto) {
+    renderGames(gamesData);
+    renderNoticias();
+    return;
+  }
+
+  // ==========================
+  // 1. BUSCAR EN JUEGOS
+  // ==========================
+  const juegosFiltrados = gamesData.filter(game =>
+    (game.nombre || "").toLowerCase().includes(texto)
   );
 
-  renderGames(filtrados);
+  if (juegosFiltrados.length > 0) {
+    showSection("juegos");
+    renderGames(juegosFiltrados);
+    return;
+  }
+
+  // ==========================
+  // 2. BUSCAR EN NOTICIAS
+  // ==========================
+  const noticiasFiltradas = newsData.filter(n =>
+    (n.titulo || "").toLowerCase().includes(texto) ||
+    (n.contenido || "").toLowerCase().includes(texto)
+  );
+
+  if (noticiasFiltradas.length > 0) {
+    showSection("noticias");
+    renderNoticiasFiltradas(noticiasFiltradas);
+    return;
+  }
+
+  // ==========================
+  // 3. BUSCAR EN ROBA / ROBUX / ROPA
+  // ==========================
+  if (
+    texto.includes("robux") ||
+    texto.includes("premium") ||
+    texto.includes("microsoft") ||
+    texto.includes("rewards") ||
+    texto.includes("afiliados") ||
+    texto.includes("eventos") ||
+    texto.includes("sorteo")
+  ) {
+    showSection("robux");
+    return;
+  }
+
+  if (
+    texto.includes("ropa") ||
+    texto.includes("mansion") ||
+    texto.includes("wonder") ||
+    texto.includes("island") ||
+    texto.includes("move") ||
+    texto.includes("avatar") ||
+    texto.includes("codigo")
+  ) {
+    showSection("ropa");
+    return;
+  }
+
+  if (
+    texto.includes("inicio") ||
+    texto.includes("participar") ||
+    texto.includes("sorteo")
+  ) {
+    showSection("inicio");
+    return;
+  }
+
+  // ==========================
+  // 4. SI NO ENCUENTRA NADA
+  // ==========================
+  alert("No se encontró nada con: " + valor);
 }
 
 // ===============================
@@ -434,6 +507,43 @@ function renderNoticias() {
   }
 
   newsData.forEach(news => {
+    const div = document.createElement("div");
+    div.className = "neo-card overflow-hidden";
+
+    div.innerHTML = `
+      <img src="${news.imagen_url || ""}" class="w-full h-48 object-cover"
+        onerror="this.src='https://via.placeholder.com/512'">
+
+      <div class="p-6">
+        <h3 class="text-xl font-bold titanium-title mb-2">${news.titulo || "Sin título"}</h3>
+        <p class="text-gray-300 text-sm mb-3">${news.contenido || ""}</p>
+        <p class="text-gray-500 text-xs">Publicado: ${new Date(news.created_at).toLocaleDateString()}</p>
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+// ===============================
+// RENDER NOTICIAS FILTRADAS (NUEVO)
+// ===============================
+function renderNoticiasFiltradas(lista) {
+  const container = document.getElementById("newsContainer");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (!lista || lista.length === 0) {
+    container.innerHTML = `
+      <div class="neo-card p-6 text-center col-span-full">
+        <h3 class="text-xl font-bold cyber-accent mb-2">No hay noticias con ese texto</h3>
+      </div>
+    `;
+    return;
+  }
+
+  lista.forEach(news => {
     const div = document.createElement("div");
     div.className = "neo-card overflow-hidden";
 
